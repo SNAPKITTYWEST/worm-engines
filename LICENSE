@@ -1,0 +1,60 @@
+WORM Engines — Dual Licensing
+
+This software is licensed under BOTH:
+1. Sovereign Source License (proprietary commercial)
+2. Business Source License (BSL 1.1) with change date 2027-12-31
+
+COMMERCIAL LICENSE ONLY
+
+These WORM engines are proprietary, commercial software. All rights reserved.
+
+Copyright © 2026 Sovereign Source Foundation.
+Legal representation: CARTO Legal Services.
+
+---
+
+Sovereign Source License
+
+This software and documentation are proprietary and confidential.
+Unauthorized copying, modification, or distribution is prohibited.
+
+Permitted use:
+- Commercial license holders only
+- Internal use within licensed organization
+- Licensed recipients and authorized contractors
+
+Prohibited use:
+- Open source projects
+- Competing products
+- Reverse engineering
+- Redistribution without license
+- Benchmarking or performance testing without consent
+
+For licensing inquiries: legal@sovereigncode.dev
+
+---
+
+Business Source License 1.1
+
+Terms: https://mariadb.com/bsl11/
+
+Change Date: December 31, 2027
+Change License: Apache 2.0
+
+Until the Change Date, you may not use this software except:
+1. As part of an authorized commercial license from Sovereign Source Foundation
+2. In compliance with the restrictions above
+
+On or after the Change Date, this software will be available under Apache 2.0.
+
+---
+
+NO WARRANTY
+
+THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR DAMAGES.
+
+By using this software, you acknowledge:
+1. You are a licensed commercial entity
+2. You accept all terms above
+3. You indemnify Sovereign Source Foundation from liability

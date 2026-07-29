@@ -1,3 +1,7 @@
+-- Copyright © 2026 Sovereign Source Foundation. All rights reserved.
+-- Licensed under Sovereign Source License. Commercial use only.
+-- See LICENSE for complete terms.
+
 pragma Ada_2012;
 pragma SPARK_Mode (On);
 

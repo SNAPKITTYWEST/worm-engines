@@ -1,3 +1,7 @@
+-- Copyright © 2026 Sovereign Source Foundation. All rights reserved.
+-- Licensed under Sovereign Source License. Commercial use only.
+-- See LICENSE for complete terms.
+
 -- SPARK Conformance Test: Hash Chain Integrity
 -- Test: Verify hash links between consecutive records
 -- Expected: Each previous_hash matches computed hash of prior record

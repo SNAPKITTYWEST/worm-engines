@@ -1,3 +1,7 @@
+// Copyright © 2026 Sovereign Source Foundation. All rights reserved.
+// Licensed under Sovereign Source License. Commercial use only.
+// See LICENSE for complete terms.
+
 const std = @import("std");
 const WormWriter = @import("writer.zig").WormWriter;
 

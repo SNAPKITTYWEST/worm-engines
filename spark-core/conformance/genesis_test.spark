@@ -1,3 +1,7 @@
+-- Copyright © 2026 Sovereign Source Foundation. All rights reserved.
+-- Licensed under Sovereign Source License. Commercial use only.
+-- See LICENSE for complete terms.
+
 -- SPARK Conformance Test: Genesis Record Creation
 -- Test: Create first record in new stream
 -- Expected: Sequence=0, Previous_Hash=0x00*32, State transitions to GENESIS
