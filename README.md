@@ -1,138 +1,190 @@
 # WORM Engines
 
-Multi-language append-only ledger fabric with a Zig storage engine, SPARK-verified control invariants, OCaml policy layer, Erlang replication mesh, and stable C ABI.
+Multi-language append-only ledger fabric with Zig storage, SPARK formal specification, OCaml policy layer, and Erlang replication mesh.
 
-**Status**: Early development (0.2.0-dev). Durable storage complete, cross-language vectors validated, formal proofs + replication designed.
-
----
-
-## Gates Progress
-
-| Gate | Objective | Status |
-|------|-----------|--------|
-| **1** | Specification | ✅ |
-| **2** | Durable Local Append | ✅ |
-| **3** | C ABI Parity | ✅ |
-| **4** | Cross-Language Vectors | ✅ Complete |
-| **5** | SPARK Proof Report | ✅ Phase 1 |
-| **6** | Replication Harness | ✅ Phase 1 |
-| **7** | External Audit | ⏳ Pending |
+**Current Status: 0.2.0-dev (Experimental, C-grade)**  
+**Target: 1.0.0 (Production-ready, B+) in 3-6 months**  
+**License: Business Source License 1.1 (→ AGPL-3.0 Dec 31, 2027)**
 
 ---
 
-## What's Done
+## ⚠️ Important: Not Production-Ready
 
-✅ **Specification** — CDDL, hash domain, invariants  
-✅ **Durable Zig Storage** — Segments, manifest, fsync, recovery  
-✅ **C ABI** — All 11 functions, C conformance test  
-✅ **Golden Vectors** — Zig generator, determinism verified  
-✅ **Cross-Language Test** — Zig ↔ C byte-for-byte match  
-✅ **Minimal Slice Integration** — Phase 5 stubs in 3 repos  
-✅ **SPARK Formal Spec** — All 12 invariants (Ada SPARK)  
-✅ **Erlang Mesh** — Distributed replication + gossip protocol
+WORM Engines is an **experimental prototype**. Do not use in production without careful review.
+
+See **ASSURANCE_MATRIX.md** for exact evidence levels on each component.
 
 ---
 
-## Gate 5: SPARK Proof Report (Phase 1 Complete)
+## What Works Today
 
-**12 Formal Invariants in Ada SPARK:**
-- Sequence Monotonicity
-- Timestamp Monotonicity
-- Hash Chain Integrity
-- Committed Immutability
-- Writer Stability
-- Policy Monotonicity
-- Signature Authenticity
-- Payload Commitment
-- Record Uniqueness
-- Recovery Prefix
-- Replication Causality
-- Genesis Uniqueness
-
-**Files:**
-- `spark/worm_invariants.ads` — 12 invariants (270 lines)
-- `spark/worm_invariants.adb` — State machine (80 lines)
-- `GATE_5_SPARK_PROOF.md` — Proof strategy
-
-**Next:** GNATprove verification → Lean 4 → Mathlib integration
+✅ **Zig append path** — Records durably written to segments + manifest  
+✅ **C ABI** — 11 functions exposed, 2-language conformance  
+✅ **Golden vectors** — Zig ↔ C byte-for-byte CBOR + SHA-256 match  
+✅ **SPARK formal spec** — 12 invariants specified (not yet GNATprove verified)  
+✅ **Erlang mesh design** — Gossip protocol, not yet tested  
+✅ **Licensed** — Official BSL 1.1, change date 2027-12-31
 
 ---
 
-## Gate 6: Replication Harness (Phase 1 Complete)
+## What Needs Work (P0)
 
-**Erlang Mesh Replication:**
+❌ **Zig storage** — 10 critical bugs (recovery missing, validation incomplete)  
+❌ **4-language vectors** — OCaml/Erlang generators not integrated  
+❌ **Signing/verification** — Ed25519 functions not implemented  
+❌ **Erlang replication** — NIF not implemented, no multi-node tests  
+❌ **External audit** — Not yet security reviewed  
 
-Multi-node distributed ledger with gossip protocol:
+See **ROADMAP.md** for detailed path to v1.0.0.
 
-```
-Node A (seq:5) ──gossip─→ Node B (seq:4)
-         ↓                    ↓
-    append(WriterA)    accept(if seq > local)
+---
+
+## Quick Start (Experimental Only)
+
+```bash
+git clone https://github.com/SNAPKITTYWEST/worm-engines.git
+cd worm-engines
+
+# Build Zig storage
+cd zig-engine
+zig build
+
+# Run conformance test (2-language only)
+cd ../conformance/vectors
+./run_all_tests.sh
 ```
 
-**Files:**
-- `erlang/worm_mesh.erl` — Replication node (350 lines)
-  * gen_server gossip coordinator
-  * Invariant verification (Seq, Writer, Payload, Causality)
-  * Peer broadcast + acceptance logic
-
-- `erlang/worm_ledger_nif.erl` — Zig bridge (45 lines)
-  * Erlang NIF to C ABI
-  * Functions: init, append, query_sequence, query_hash
-
-- `GATE_6_REPLICATION_HARNESS.md` — Protocol + architecture
-
-**Semantics:**
-- Causality: peer_seq > local_seq before accept (Inv11)
-- Durability: All appends via Zig fsync (Inv4, Inv10)
-- Eventual consistency: All nodes converge
-
-**Next:** NIF implementation → Multi-node tests → Byzantine hardening
-
----
-
-## Cross-Language Vectors (Gate 4 Complete)
-
-**Test:** `./conformance/vectors/run_all_tests.sh`
-
-**Status:**
-- ✅ Zig: deterministic CBOR + hash
-- ✅ C: matches Zig byte-for-byte
-- ⏳ OCaml: scaffold ready
-- ⏳ Erlang: scaffold ready
-
----
-
-## Repository
-
-https://github.com/SNAPKITTYWEST/worm-engines (22 commits)
-
-Recent:
-- 0594d1c: Gate 6 Phase 1 (Erlang mesh)
-- c394cd5: Gate 5 Phase 1 (SPARK spec)
-- 64adc6d: SPARK formal invariants
+**Result:** Zig and C produce identical records. ✅
 
 ---
 
 ## Architecture
 
 ```
-Layer 7: External Audit — Pending ⏳
-Layer 6: Erlang Mesh (replication) — Phase 1 ✅
-Layer 5: Language Bindings — Pending (Phase 5)
-Layer 4: OCaml Policy (rules) — Complete ✅
-Layer 3: Ada SPARK (formal proofs) — Phase 1 ✅
-Layer 2: C ABI (11 functions) — Complete ✅
-Layer 1: Zig Storage (durable) — Complete ✅
-Foundation: Specification — Complete ✅
+Layer 5: Language Bindings    (Pending)
+Layer 4: Erlang Mesh           (Designed, tests pending)
+Layer 4: OCaml Policy          (Complete)
+Layer 3: Ada SPARK (Formal)    (Specified, GNATprove pending)
+Layer 2: C ABI (11 functions)  (Complete)
+Layer 1: Zig Storage (Durable) (Append works, recovery pending)
+────────────────────────────────────────
+Foundation: CDDL Spec         (Complete)
 ```
+
+---
+
+## Evidence by Component
+
+| Component | Specified | Implemented | Unit Tested | Integrated | GNATprove | Audited | Production |
+|-----------|-----------|-------------|-------------|------------|-----------|---------|-----------|
+| Zig storage | ✅ | ✅ | ⏳ | ⏳ | ❌ | ❌ | ❌ |
+| C ABI | ✅ | ✅ | ✅ | ⏳ | ❌ | ❌ | ❌ |
+| Vectors (Zig/C) | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Vectors (all 4) | ✅ | ⏳ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| SPARK invariants | ✅ | ✅ | ❌ | ❌ | ⏳ | ❌ | ❌ |
+| Erlang mesh | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+**Full matrix:** See [ASSURANCE_MATRIX.md](ASSURANCE_MATRIX.md)
+
+---
+
+## Roadmap to Production
+
+### v0.2.1 (2 weeks) — P0 Fixes
+- [ ] Fix 10 critical Zig storage bugs
+- [ ] Complete crash-injection harness
+- [ ] Fix documentation contradictions
+
+### v0.3.0 (4 weeks) — Evidence Cycle
+- [ ] GNATprove verification (all 12 SPARK invariants)
+- [ ] Complete 4-language vectors
+- [ ] Ed25519 signing + verification
+
+### v0.4.0 (4 weeks) — Complete Implementations
+- [ ] Erlang NIF + 3-node mesh tests
+- [ ] Key management + writer rotation
+- [ ] User guide + architecture docs
+
+### v0.5.0 (6 weeks) — Hardening & Audit
+- [ ] 20+ crash-recovery scenarios
+- [ ] Fuzz testing (all parsers)
+- [ ] External security audit
+- [ ] Reproducible builds + SBOM
+
+### v1.0.0 (2 weeks) — Production Release
+- [ ] All quality gates passed
+- [ ] Signed release artifacts
+- [ ] Enterprise support ready
+
+**Total:** ~3-6 months, 3-4 FTE equivalent
+
+See [ROADMAP.md](ROADMAP.md) for full details.
+
+---
+
+## Documentation
+
+- **[ASSURANCE_MATRIX.md](ASSURANCE_MATRIX.md)** — Evidence levels per component
+- **[ROADMAP.md](ROADMAP.md)** — Path to v1.0.0 (detailed)
+- **[COMMERCIAL.md](COMMERCIAL.md)** — Licensing tiers + SaaS restrictions
+- **[SECURITY.md](SECURITY.md)** — Threat model + verification scope
+- **[PROOF_STATUS.md](PROOF_STATUS.md)** — Formal assurance status
+- **[SPECIFICATION.md](SPECIFICATION.md)** — CDDL record format
+- **[GATE_5_SPARK_PROOF.md](GATE_5_SPARK_PROOF.md)** — 12 formal invariants
+- **[GATE_6_REPLICATION_HARNESS.md](GATE_6_REPLICATION_HARNESS.md)** — Erlang mesh protocol
+
+---
+
+## Repository
+
+**GitHub:** https://github.com/SNAPKITTYWEST/worm-engines  
+**License:** Business Source License 1.1 (Elastic Commons Clause)  
+**Change Date:** December 31, 2027 (→ AGPL-3.0-only)
 
 ---
 
 ## Licensing
 
-Dual licensed (Sovereign Source + BSL 1.1, change date 2027-12-31).
+### Community Use
+Free under BSL 1.1 for:
+- Internal evaluation
+- Non-production use
+- Open-source projects (after 2028)
+
+### Commercial Use
+License required for:
+- SaaS hosting
+- Closed-source integration
+- Production deployment
+
+Contact: **licensing@snapkittywest.dev**
+
+See [COMMERCIAL.md](COMMERCIAL.md) for tiers and pricing.
 
 ---
 
-**WORM Engines**: Deterministic. Verifiable. Distributed.
+## Contributing
+
+WORM Engines is actively developed. See [ROADMAP.md](ROADMAP.md) for current priorities.
+
+**How to help:**
+1. Report bugs (issues with ASSURANCE_MATRIX evidence level)
+2. Review P0 fixes (Zig storage)
+3. Contribute tests (crash-recovery, fuzzing)
+4. Security review (informal welcome; formal audit in v0.5)
+
+---
+
+## Contact
+
+- **Licensing:** licensing@snapkittywest.dev
+- **Security:** security@snapkittywest.dev
+- **Support:** support@snapkittywest.dev
+- **GitHub Issues:** https://github.com/SNAPKITTYWEST/worm-engines/issues
+
+---
+
+**WORM Engines: Deterministic. Verifiable. On the Path to Production.**
+
+Last updated: 2026-07-29  
+Next release target: v0.2.1 (2 weeks)
