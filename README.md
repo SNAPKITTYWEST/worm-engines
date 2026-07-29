@@ -2,7 +2,7 @@
 
 Multi-language append-only ledger fabric with a Zig storage engine, SPARK-verified control invariants, OCaml policy layer, Erlang replication mesh, and stable C ABI.
 
-**Status**: Early development (0.2.0-dev). Durable storage complete, cross-language vectors validated, formal proofs in progress.
+**Status**: Early development (0.2.0-dev). Durable storage complete, cross-language vectors validated, formal proofs + replication designed.
 
 ---
 
@@ -15,7 +15,7 @@ Multi-language append-only ledger fabric with a Zig storage engine, SPARK-verifi
 | **3** | C ABI Parity | ✅ |
 | **4** | Cross-Language Vectors | ✅ Complete |
 | **5** | SPARK Proof Report | ✅ Phase 1 |
-| **6** | Replication Harness | ⏳ Pending |
+| **6** | Replication Harness | ✅ Phase 1 |
 | **7** | External Audit | ⏳ Pending |
 
 ---
@@ -27,39 +27,67 @@ Multi-language append-only ledger fabric with a Zig storage engine, SPARK-verifi
 ✅ **C ABI** — All 11 functions, C conformance test  
 ✅ **Golden Vectors** — Zig generator, determinism verified  
 ✅ **Cross-Language Test** — Zig ↔ C byte-for-byte match  
-✅ **Minimal Slice Integration** — Phase 5 stubs in sovereign-forge, j-matrix-twin, snapkitty-resonance-isa  
-✅ **SPARK Formal Spec** — All 12 invariants in Ada SPARK
+✅ **Minimal Slice Integration** — Phase 5 stubs in 3 repos  
+✅ **SPARK Formal Spec** — All 12 invariants (Ada SPARK)  
+✅ **Erlang Mesh** — Distributed replication + gossip protocol
 
 ---
 
 ## Gate 5: SPARK Proof Report (Phase 1 Complete)
 
-**12 Formal Invariants Specified:**
+**12 Formal Invariants in Ada SPARK:**
+- Sequence Monotonicity
+- Timestamp Monotonicity
+- Hash Chain Integrity
+- Committed Immutability
+- Writer Stability
+- Policy Monotonicity
+- Signature Authenticity
+- Payload Commitment
+- Record Uniqueness
+- Recovery Prefix
+- Replication Causality
+- Genesis Uniqueness
 
-1. **Sequence Monotonicity** — Strictly increasing sequence numbers
-2. **Timestamp Monotonicity** — Non-decreasing timestamps
-3. **Hash Chain Integrity** — Each record links to predecessor
-4. **Committed Immutability** — Fsync'd records cannot change
-5. **Writer Stability** — Writer ID is constant
-6. **Policy Monotonicity** — Policy rules never weaken
-7. **Signature Authenticity** — Valid Ed25519 signatures
-8. **Payload Commitment** — Cryptographic payload hashes
-9. **Record Uniqueness** — No duplicate (stream, seq, writer)
-10. **Recovery Prefix** — All committed records on disk
-11. **Replication Causality** — Hash dependencies ordered
-12. **Genesis Uniqueness** — Exactly one root record
+**Files:**
+- `spark/worm_invariants.ads` — 12 invariants (270 lines)
+- `spark/worm_invariants.adb` — State machine (80 lines)
+- `GATE_5_SPARK_PROOF.md` — Proof strategy
 
-**Specification:**
-- `spark/worm_invariants.ads` — 12 invariants as pure functions (270 lines)
-- `spark/worm_invariants.adb` — State machine implementation (80 lines)
+**Next:** GNATprove verification → Lean 4 → Mathlib integration
 
-**Documentation:**
-- `GATE_5_SPARK_PROOF.md` — Full proof strategy
+---
 
-**Next Phases:**
-- Phase 2: GNATprove verification (automated proof checking)
-- Phase 3: Lean 4 formalization (theorem prover)
-- Phase 4: Lean integration with Mathlib
+## Gate 6: Replication Harness (Phase 1 Complete)
+
+**Erlang Mesh Replication:**
+
+Multi-node distributed ledger with gossip protocol:
+
+```
+Node A (seq:5) ──gossip─→ Node B (seq:4)
+         ↓                    ↓
+    append(WriterA)    accept(if seq > local)
+```
+
+**Files:**
+- `erlang/worm_mesh.erl` — Replication node (350 lines)
+  * gen_server gossip coordinator
+  * Invariant verification (Seq, Writer, Payload, Causality)
+  * Peer broadcast + acceptance logic
+
+- `erlang/worm_ledger_nif.erl` — Zig bridge (45 lines)
+  * Erlang NIF to C ABI
+  * Functions: init, append, query_sequence, query_hash
+
+- `GATE_6_REPLICATION_HARNESS.md` — Protocol + architecture
+
+**Semantics:**
+- Causality: peer_seq > local_seq before accept (Inv11)
+- Durability: All appends via Zig fsync (Inv4, Inv10)
+- Eventual consistency: All nodes converge
+
+**Next:** NIF implementation → Multi-node tests → Byzantine hardening
 
 ---
 
@@ -67,33 +95,31 @@ Multi-language append-only ledger fabric with a Zig storage engine, SPARK-verifi
 
 **Test:** `./conformance/vectors/run_all_tests.sh`
 
-**Result:** Zig and C produce identical CBOR bytes and SHA-256 hashes for canonical genesis record.
-
 **Status:**
 - ✅ Zig: deterministic CBOR + hash
 - ✅ C: matches Zig byte-for-byte
-- ⏳ OCaml: scaffold ready (library integration pending)
-- ⏳ Erlang: scaffold ready (mesh integration pending)
+- ⏳ OCaml: scaffold ready
+- ⏳ Erlang: scaffold ready
 
 ---
 
 ## Repository
 
-https://github.com/SNAPKITTYWEST/worm-engines (20 commits)
+https://github.com/SNAPKITTYWEST/worm-engines (22 commits)
 
 Recent:
-- 64adc6d: Gate 5 Phase 1 (SPARK invariants)
-- 0067b83: Phase 5 slice integration complete
-- fa1b489: README updated for Gate 4 completion
-- 15d0aa1: Gate 4 Phase C (composite test runner)
+- 0594d1c: Gate 6 Phase 1 (Erlang mesh)
+- c394cd5: Gate 5 Phase 1 (SPARK spec)
+- 64adc6d: SPARK formal invariants
 
 ---
 
 ## Architecture
 
 ```
+Layer 7: External Audit — Pending ⏳
+Layer 6: Erlang Mesh (replication) — Phase 1 ✅
 Layer 5: Language Bindings — Pending (Phase 5)
-Layer 4: Erlang Mesh (replication) — Designed ✅
 Layer 4: OCaml Policy (rules) — Complete ✅
 Layer 3: Ada SPARK (formal proofs) — Phase 1 ✅
 Layer 2: C ABI (11 functions) — Complete ✅
@@ -109,4 +135,4 @@ Dual licensed (Sovereign Source + BSL 1.1, change date 2027-12-31).
 
 ---
 
-**WORM Engines**: Deterministic. Verifiable. Durable.
+**WORM Engines**: Deterministic. Verifiable. Distributed.
