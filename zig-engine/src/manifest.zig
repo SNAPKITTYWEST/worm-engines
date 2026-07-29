@@ -1,9 +1,16 @@
 // Copyright © 2026 Sovereign Source Foundation. All rights reserved.
-// Licensed under Sovereign Source License. Commercial use only.
+// Licensed under Business Source License 1.1.
 // See LICENSE for complete terms.
 
 const std = @import("std");
 const constants = @import("constants.zig");
+
+pub const ManifestError = error{
+    ManifestNotFound,
+    ManifestTruncated,
+    ManifestVersionUnsupported,
+    ManifestCorrupt,
+};
 
 pub const Manifest = struct {
     path: []const u8,
@@ -26,46 +33,53 @@ pub const Manifest = struct {
     }
 
     pub fn save(self: *Manifest) !void {
-        var buffer: [88]u8 = undefined;
+        // Build candidate manifest first (transactional pattern)
+        var candidate: [88]u8 = [_]u8{0} ** 88;
         var pos: usize = 0;
 
-        std.mem.writeIntBig(u32, buffer[pos..][0..4], constants.RECORD_VERSION);
+        std.mem.writeIntBig(u32, candidate[pos..][0..4], constants.RECORD_VERSION);
         pos += 4;
-        std.mem.writeIntBig(u64, buffer[pos..][0..8], self.head_sequence);
+        std.mem.writeIntBig(u64, candidate[pos..][0..8], self.head_sequence);
         pos += 8;
-        @memcpy(buffer[pos..][0..32], &self.head_hash);
+        @memcpy(candidate[pos..][0..32], &self.head_hash);
         pos += 32;
-        std.mem.writeIntBig(u64, buffer[pos..][0..8], self.head_timestamp);
+        std.mem.writeIntBig(u64, candidate[pos..][0..8], self.head_timestamp);
         pos += 8;
-        std.mem.writeIntBig(u64, buffer[pos..][0..8], self.total_records);
+        std.mem.writeIntBig(u64, candidate[pos..][0..8], self.total_records);
 
+        // Write to temp file
         const tmp_path = try std.fmt.allocPrint(self.allocator, "{s}.tmp", .{self.path});
         defer self.allocator.free(tmp_path);
 
         var tmp_file = try std.fs.cwd().createFile(tmp_path, .{});
         defer tmp_file.close();
 
-        try tmp_file.writeAll(&buffer);
+        try tmp_file.writeAll(&candidate);
         try tmp_file.sync();
 
+        // Atomic rename only after durable write
         try std.fs.cwd().renameZ(tmp_path, self.path);
     }
 
-    pub fn load(allocator: std.mem.Allocator, path: []const u8) !?Manifest {
+    pub fn load(allocator: std.mem.Allocator, path: []const u8) ManifestError!?Manifest {
         var buffer: [88]u8 = undefined;
         const file = std.fs.cwd().openFile(path, .{}) catch |err| {
             if (err == std.fs.File.OpenError.FileNotFound) return null;
-            return err;
+            return ManifestError.ManifestCorrupt;
         };
         defer file.close();
 
         const bytes_read = try file.readAll(&buffer);
-        if (bytes_read < 88) return null;
+        if (bytes_read == 0) return null;  // Empty file = fresh manifest
+        if (bytes_read < 88) return ManifestError.ManifestTruncated;
 
         var pos: usize = 0;
         const version = std.mem.readIntBig(u32, buffer[pos..][0..4]);
         pos += 4;
-        if (version != constants.RECORD_VERSION) return null;
+
+        if (version != constants.RECORD_VERSION) {
+            return ManifestError.ManifestVersionUnsupported;
+        }
 
         const head_seq = std.mem.readIntBig(u64, buffer[pos..][0..8]);
         pos += 8;
