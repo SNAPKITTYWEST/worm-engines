@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style type="text/css">
+      <![CDATA[
+        .title-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace; font-size: 80px; font-weight: 800; letter-spacing: 8px; fill: #E7E7EA; }
+        .tagline-primary { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace; font-size: 24px; font-weight: 700; letter-spacing: 3px; fill: #8B5CF6; }
+        .tagline-secondary { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace; font-size: 16px; letter-spacing: 2px; fill: #A0A0A8; }
+        .capability-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace; font-size: 11px; font-weight: 700; letter-spacing: 1px; fill: #E7E7EA; }
+        .language-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace; font-size: 10px; letter-spacing: 0.5px; fill: #A0A0A8; }
+      ]]>
+    </style>
+    <linearGradient id="metallic-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E7E7EA;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#D0D0D8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8B8C0;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="purple-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#4C1D95;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="900" fill="#050507"/>
+  <rect width="1600" height="900" fill="#111116" opacity="0.5"/>
+
+  <!-- Subtle top-to-bottom gradient overlay -->
+  <defs>
+    <linearGradient id="bg-fade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a22;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#050507;stop-opacity:0" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg-fade)"/>
+
+  <!-- Emblem: Interlocking append-only chain links -->
+  <g id="emblem" transform="translate(800, 200)">
+    <!-- Purple aura -->
+    <circle cx="0" cy="0" r="140" fill="url(#purple-glow)"/>
+
+    <!-- Link 1: Left segment (hexagonal angular link) -->
+    <path d="M -60,-40 L -20,-60 L 20,-60 L 60,-40 L 50,0 L 60,40 L 20,60 L -20,60 L -60,40 L -50,0 Z"
+          fill="none" stroke="url(#metallic-gradient)" stroke-width="3" stroke-linejoin="round"/>
+
+    <!-- Link 2: Center segment (overlapping) -->
+    <path d="M -10,-80 L 50,-100 L 100,-80 L 110,-20 L 100,40 L 50,60 L -10,40 L -20,-20 Z"
+          fill="none" stroke="url(#metallic-gradient)" stroke-width="3" stroke-linejoin="round" opacity="0.9"/>
+
+    <!-- Link 3: Right segment (ascending) -->
+    <path d="M 50,-120 L 110,-140 L 160,-120 L 170,-40 L 160,40 L 110,60 L 50,40 L 40,-40 Z"
+          fill="none" stroke="#8B5CF6" stroke-width="3" stroke-linejoin="round" opacity="0.8"/>
+
+    <!-- Chain continuity accent line -->
+    <path d="M -70,0 Q 0,30 170,-40" fill="none" stroke="#8B5CF6" stroke-width="1.5" opacity="0.4" stroke-dasharray="4,4"/>
+
+    <!-- Center dot (integrity point) -->
+    <circle cx="0" cy="0" r="6" fill="#8B5CF6"/>
+  </g>
+
+  <!-- Title -->
+  <text x="800" y="420" text-anchor="middle" class="title-text">WORM ENGINES</text>
+
+  <!-- Primary tagline -->
+  <text x="800" y="475" text-anchor="middle" class="tagline-primary">VERIFIABLE · DURABLE · SOVEREIGN</text>
+
+  <!-- Divider line -->
+  <line x1="400" y1="510" x2="1200" y2="510" stroke="#4C1D95" stroke-width="1" opacity="0.3"/>
+
+  <!-- Secondary tagline -->
+  <text x="800" y="540" text-anchor="middle" class="tagline-secondary">A MULTI-LANGUAGE WORM LEDGER FABRIC</text>
+
+  <!-- Capabilities rail -->
+  <g id="capabilities">
+    <!-- Capability 1 -->
+    <g transform="translate(160, 640)">
+      <rect width="240" height="180" rx="8" fill="#111116" stroke="#4C1D95" stroke-width="1" opacity="0.5"/>
+      <text x="120" y="50" text-anchor="middle" class="capability-label">IMMUTABLE BY DESIGN</text>
+      <text x="120" y="80" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">Write-once record lifecycle</text>
+      <text x="120" y="100" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">and committed-state protection</text>
+    </g>
+
+    <!-- Capability 2 -->
+    <g transform="translate(440, 640)">
+      <rect width="240" height="180" rx="8" fill="#111116" stroke="#4C1D95" stroke-width="1" opacity="0.5"/>
+      <text x="120" y="50" text-anchor="middle" class="capability-label">CRYPTOGRAPHIC INTEGRITY</text>
+      <text x="120" y="80" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">Canonical hashing, chain linkage,</text>
+      <text x="120" y="100" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">signatures, and receipts</text>
+    </g>
+
+    <!-- Capability 3 -->
+    <g transform="translate(720, 640)">
+      <rect width="240" height="180" rx="8" fill="#111116" stroke="#4C1D95" stroke-width="1" opacity="0.5"/>
+      <text x="120" y="50" text-anchor="middle" class="capability-label">FORMALLY SPECIFIED</text>
+      <text x="120" y="80" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">Ada SPARK invariants and</text>
+      <text x="120" y="100" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">machine-checkable assurance</text>
+    </g>
+
+    <!-- Capability 4 -->
+    <g transform="translate(1000, 640)">
+      <rect width="240" height="180" rx="8" fill="#111116" stroke="#4C1D95" stroke-width="1" opacity="0.5"/>
+      <text x="120" y="50" text-anchor="middle" class="capability-label">DISTRIBUTED RESILIENCE</text>
+      <text x="120" y="80" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">Erlang replication and recovery</text>
+      <text x="120" y="100" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">coordination</text>
+    </g>
+
+    <!-- Capability 5 -->
+    <g transform="translate(1280, 640)">
+      <rect width="240" height="180" rx="8" fill="#111116" stroke="#4C1D95" stroke-width="1" opacity="0.5"/>
+      <text x="120" y="50" text-anchor="middle" class="capability-label">AUDITABLE PROVENANCE</text>
+      <text x="120" y="80" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">Deterministic records and</text>
+      <text x="120" y="100" text-anchor="middle" style="font-size: 12px; fill: #8A8A96; font-family: monospace;">reproducible verification</text>
+    </g>
+  </g>
+
+  <!-- Language stack -->
+  <g id="language-stack">
+    <!-- Zig -->
+    <g transform="translate(160, 820)">
+      <rect width="80" height="50" rx="4" fill="#1a1a1f" stroke="#8B5CF6" stroke-width="0.5" opacity="0.6"/>
+      <text x="40" y="32" text-anchor="middle" class="language-label">ZIG</text>
+    </g>
+
+    <!-- Ada SPARK -->
+    <g transform="translate(280, 820)">
+      <rect width="120" height="50" rx="4" fill="#1a1a1f" stroke="#8B5CF6" stroke-width="0.5" opacity="0.6"/>
+      <text x="60" y="32" text-anchor="middle" class="language-label">ADA / SPARK</text>
+    </g>
+
+    <!-- Erlang -->
+    <g transform="translate(440, 820)">
+      <rect width="100" height="50" rx="4" fill="#1a1a1f" stroke="#8B5CF6" stroke-width="0.5" opacity="0.6"/>
+      <text x="50" y="32" text-anchor="middle" class="language-label">ERLANG</text>
+    </g>
+
+    <!-- OCaml -->
+    <g transform="translate(580, 820)">
+      <rect width="100" height="50" rx="4" fill="#1a1a1f" stroke="#8B5CF6" stroke-width="0.5" opacity="0.6"/>
+      <text x="50" y="32" text-anchor="middle" class="language-label">OCAML</text>
+    </g>
+
+    <!-- C ABI -->
+    <g transform="translate(720, 820)">
+      <rect width="100" height="50" rx="4" fill="#1a1a1f" stroke="#8B5CF6" stroke-width="0.5" opacity="0.6"/>
+      <text x="50" y="32" text-anchor="middle" class="language-label">C ABI</text>
+    </g>
+
+    <!-- Repository link -->
+    <text x="960" y="850" style="font-size: 12px; fill: #8A8A96; font-family: monospace; letter-spacing: 1px;">github.com/SNAPKITTYWEST/worm-engines</text>
+  </g>
+
+  <!-- Accessibility -->
+  <title>WORM Engines — Verifiable, Durable, Multi-Language Append-Only Ledger Fabric</title>
+  <desc>Visual identity for WORM Engines: a multi-language append-only ledger fabric with durable storage, cryptographic integrity, formal verification, and distributed replication.</desc>
+</svg>

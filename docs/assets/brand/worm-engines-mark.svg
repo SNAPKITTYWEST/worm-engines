@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="mark-metallic" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E7E7EA;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#D0D0D8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8B8C0;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="mark-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#4C1D95;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Transparent background -->
+  <rect width="512" height="512" fill="transparent"/>
+
+  <!-- Glow aura -->
+  <circle cx="256" cy="256" r="180" fill="url(#mark-glow)"/>
+
+  <!-- Link 1: Left segment -->
+  <path d="M 120,150 L 180,120 L 240,120 L 280,150 L 260,220 L 280,290 L 240,320 L 180,320 L 140,290 L 160,220 Z"
+        fill="none" stroke="url(#mark-metallic)" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Link 2: Center segment (overlapping) -->
+  <path d="M 180,80 L 280,40 L 380,80 L 400,180 L 380,280 L 280,320 L 180,280 L 160,180 Z"
+        fill="none" stroke="url(#mark-metallic)" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>
+
+  <!-- Link 3: Right segment (ascending) -->
+  <path d="M 280,20 L 400,80 L 460,150 L 480,260 L 460,370 L 400,420 L 280,380 L 260,260 Z"
+        fill="none" stroke="#8B5CF6" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" opacity="0.75"/>
+
+  <!-- Chain continuity accent -->
+  <path d="M 100,220 Q 220,270 480,200" fill="none" stroke="#8B5CF6" stroke-width="3" opacity="0.3" stroke-dasharray="8,8"/>
+
+  <!-- Center integrity dot -->
+  <circle cx="256" cy="220" r="12" fill="#8B5CF6"/>
+
+  <!-- Accessibility -->
+  <title>WORM Engines Mark</title>
+  <desc>Interlocking append-only chain emblem representing WORM Engines' verifiable, durable, and sovereign architecture.</desc>
+</svg>
