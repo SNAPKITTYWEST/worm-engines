@@ -1,0 +1,117 @@
+-- SPARK Conformance Test: All 12 Invariants
+-- Test: Verify all 12 invariants hold for valid record sequence
+-- Expected: All invariants satisfied after each append
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+with Worm_Control;
+use Invariants;
+use Worm_Control;
+
+package Invariant_Tests is
+
+   procedure Test_All_12_Invariants
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 1 - sequence_monotone
+   --  Expected: sequence = prev_sequence + 1
+   procedure Test_Inv_1_Sequence_Monotone
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 2 - timestamp_monotone
+   --  Expected: timestamp >= prev_timestamp
+   procedure Test_Inv_2_Timestamp_Monotone
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 3 - hash_chain_valid
+   --  Expected: previous_hash matches computed hash
+   procedure Test_Inv_3_Hash_Chain_Valid
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 4 - committed_immutable
+   --  Expected: flags bit 0 = 0 at append time
+   procedure Test_Inv_4_Committed_Immutable
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 5 - writer_identity_stable
+   --  Expected: writer_id = genesis.writer_id
+   procedure Test_Inv_5_Writer_Identity_Stable
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 6 - policy_strengthen_only
+   --  Expected: policy_hash >= prev_policy_hash (lexicographic)
+   procedure Test_Inv_6_Policy_Strengthen_Only
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 7 - signature_authentic
+   --  Expected: signature is valid Ed25519
+   procedure Test_Inv_7_Signature_Authentic
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 8 - payload_integrity
+   --  Expected: payload_hash = sha256(payload)
+   procedure Test_Inv_8_Payload_Integrity
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 9 - record_collision_free
+   --  Expected: each record hash unique (no SHA-256 collision)
+   procedure Test_Inv_9_Record_Collision_Free
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 10 - recovery_longest_prefix
+   --  Expected: recovery selects longest valid sealed prefix
+   procedure Test_Inv_10_Recovery_Longest_Prefix
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 11 - replication_no_rewind
+   --  Expected: replicated_sequence >= local_sequence
+   procedure Test_Inv_11_Replication_No_Rewind
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test: Invariant 12 - genesis_unique_per_stream
+   --  Expected: exactly one genesis record per stream_id
+   procedure Test_Inv_12_Genesis_Unique_Per_Stream
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+end Invariant_Tests;

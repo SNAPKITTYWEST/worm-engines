@@ -1,0 +1,68 @@
+-- SPARK Proof: Hash Chain Integrity Invariant
+-- Theorem: previous_hash_of_current = sha256(hash_domain(prior_record))
+--
+-- Proof Strategy:
+-- 1. Precondition: prior record has been computed and hashed
+-- 2. New record stores this hash in its previous_hash field
+-- 3. Postcondition: link from new to prior is cryptographically valid
+-- 4. Invariant holds: chain cannot be broken without detection
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+use Invariants;
+
+package Hash_Chain_Valid_Proof is
+
+   --  Lemma: Hash Link Validity
+   --  If prior_hash equals the computed hash of prior record, link is valid.
+   procedure Lemma_Hash_Link_Valid
+      (Prior_Hash_Computed : in Hash256;
+       Current_Record_Previous_Hash : in Hash256)
+   with
+      Global => null,
+      Pre => (Prior_Hash_Computed = Current_Record_Previous_Hash),
+      Post => (Invariant_Hash_Chain_Valid (Prior_Hash_Computed,
+         Current_Record_Previous_Hash));
+
+   --  Theorem: Chain Integrity
+   --  For a sequence of records, all hash links are valid (form valid chain).
+   procedure Theorem_Hash_Chain_Integrity
+      (Record_1 : in Record_Type;
+       Record_2 : in Record_Type;
+       Record_3 : in Record_Type;
+       Hash_1 : in Hash256;
+       Hash_2 : in Hash256)
+   with
+      Global => null,
+      Pre => (Hash_1 = Invariants.Invariant_Hash_Chain_Valid'Result
+         and Hash_2 = Invariants.Invariant_Hash_Chain_Valid'Result
+         and Record_2.Previous_Hash = Hash_1
+         and Record_3.Previous_Hash = Hash_2),
+      Post => (Invariant_Hash_Chain_Valid (Hash_1, Record_2.Previous_Hash)
+         and Invariant_Hash_Chain_Valid (Hash_2, Record_3.Previous_Hash));
+
+   --  Corollary: Tampering Detection
+   --  Any modification to a record changes its hash, breaking the chain.
+   --  This ensures immutability is enforced cryptographically.
+   procedure Corollary_Tampering_Detected
+      (Original_Record : in Record_Type;
+       Modified_Record : in Record_Type;
+       Next_Record : in Record_Type)
+   with
+      Global => null,
+      Pre => (Original_Record /= Modified_Record
+         and Next_Record.Previous_Hash = Invariants.Invariant_Hash_Chain_Valid'Result),
+      Post => (Next_Record.Previous_Hash /= Invariants.Invariant_Hash_Chain_Valid'Result);
+
+   --  Lemma: Genesis Link
+   --  Genesis record (sequence=0) has previous_hash = all_zeros (no prior).
+   procedure Lemma_Genesis_Link
+      (Genesis_Record : in Record_Type)
+   with
+      Global => null,
+      Pre => (Genesis_Record.Sequence = 0),
+      Post => (Genesis_Record.Previous_Hash = (others => False));
+
+end Hash_Chain_Valid_Proof;

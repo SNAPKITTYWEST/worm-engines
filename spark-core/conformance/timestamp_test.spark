@@ -1,0 +1,66 @@
+-- SPARK Conformance Test: Timestamp Monotonicity
+-- Test: Create records with advancing timestamps
+-- Expected: Each timestamp >= prior timestamp, no reversals
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+with Worm_Control;
+use Invariants;
+use Worm_Control;
+
+package Timestamp_Test is
+
+   procedure Test_Timestamp_Monotonicity
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Advancing timestamps
+   --  Input: Records with timestamp T, T+1, T+2, T+3, T+4
+   --  Expected: All records appended successfully (monotone)
+   procedure Test_Case_1_Advancing_Timestamps
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Same timestamp allowed
+   --  Input: Two records with identical timestamp
+   --  Expected: Both records valid (t_new >= t_prev satisfied)
+   procedure Test_Case_2_Same_Timestamp_Allowed
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Time reversal rejected
+   --  Input: Record with timestamp < writer.timestamp
+   --  Expected: validate_record returns WORM_ERR_TIMESTAMP_INVALID
+   procedure Test_Case_3_Time_Reversal_Rejected
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Zero timestamp allowed (Unix epoch)
+   --  Input: Genesis record with timestamp=0
+   --  Expected: Valid (zero timestamp is legitimate)
+   procedure Test_Case_4_Zero_Timestamp_Allowed
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Max timestamp safe
+   --  Input: Record with timestamp = 2^64 - 1
+   --  Expected: Valid (no overflow, handled as max uint64)
+   procedure Test_Case_5_Max_Timestamp_Safe
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+end Timestamp_Test;

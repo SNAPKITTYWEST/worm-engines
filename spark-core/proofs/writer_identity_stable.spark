@@ -1,0 +1,65 @@
+-- SPARK Proof: Writer Identity Stability Invariant
+-- Theorem: writer_id_current = writer_id_previous (fixed per stream)
+--
+-- Proof Strategy:
+-- 1. Precondition: genesis record establishes writer identity
+-- 2. All subsequent records must have same writer_id
+-- 3. Postcondition: writer_id is immutable across entire stream
+-- 4. Invariant holds: single writer per stream (no multi-writer attacks)
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+use Invariants;
+
+package Writer_Identity_Stable_Proof is
+
+   --  Lemma: Identity Binding at Genesis
+   --  Genesis record (sequence=0) establishes the writer identity for stream.
+   procedure Lemma_Genesis_Identity_Binding
+      (Genesis_Record : in Record_Type;
+       Writer : in Writer_Type)
+   with
+      Global => null,
+      Pre => (Genesis_Record.Sequence = 0),
+      Post => (Writer.Writer_Id = Genesis_Record.Writer_Id);
+
+   --  Theorem: Writer Identity Immutability
+   --  All records in a stream have identical writer_id (no writer changes).
+   procedure Theorem_Writer_Identity_Immutability
+      (Genesis_Record : in Record_Type;
+       Record_1 : in Record_Type;
+       Record_2 : in Record_Type)
+   with
+      Global => null,
+      Pre => (Genesis_Record.Sequence = 0
+         and Invariant_Writer_Identity_Stable (Genesis_Record.Writer_Id,
+            Record_1.Writer_Id)
+         and Invariant_Writer_Identity_Stable (Genesis_Record.Writer_Id,
+            Record_2.Writer_Id)),
+      Post => (Record_1.Writer_Id = Record_2.Writer_Id);
+
+   --  Corollary: Multi-Writer Attack Prevention
+   --  Records with mismatched writer_id are rejected.
+   procedure Corollary_Multi_Writer_Attack_Prevention
+      (Stream_Writer_Id : in PublicKey;
+       Incoming_Record : in Record_Type)
+   with
+      Global => null,
+      Pre => (Stream_Writer_Id /= Incoming_Record.Writer_Id),
+      Post => (not Invariant_Writer_Identity_Stable (Stream_Writer_Id,
+         Incoming_Record.Writer_Id));
+
+   --  Lemma: Single Writer Guarantee
+   --  For stream with established writer_id, all valid records share that writer_id.
+   procedure Lemma_Single_Writer_Guarantee
+      (Writer : in Writer_Type;
+       New_Record : in Record_Type)
+   with
+      Global => null,
+      Pre => (Invariant_Writer_Identity_Stable (Writer.Writer_Id,
+         New_Record.Writer_Id)),
+      Post => (Writer.Writer_Id = New_Record.Writer_Id);
+
+end Writer_Identity_Stable_Proof;

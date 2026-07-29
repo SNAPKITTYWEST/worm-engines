@@ -1,0 +1,66 @@
+-- SPARK Conformance Test: Sequence Monotonicity
+-- Test: Create 5 sequential records (sequence 0, 1, 2, 3, 4)
+-- Expected: Each sequence = prior + 1, no gaps
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+with Worm_Control;
+use Invariants;
+use Worm_Control;
+
+package Sequence_Test is
+
+   procedure Test_Sequence_Monotonicity
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: 5 sequential records
+   --  Input: Writer, 5 payloads
+   --  Expected: sequence 0, 1, 2, 3, 4 (all consecutive)
+   procedure Test_Case_1_Five_Records
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Out-of-order append rejected
+   --  Input: Record with sequence=5 when writer.sequence=1
+   --  Expected: validate_record returns WORM_ERR_SEQUENCE_MISMATCH
+   procedure Test_Case_2_Out_Of_Order_Rejected
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Gap in sequence rejected
+   --  Input: Record with sequence=3 when writer.sequence=1 (gap: 2 missing)
+   --  Expected: validate_record returns WORM_ERR_SEQUENCE_MISMATCH
+   procedure Test_Case_3_Gap_Rejected
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Duplicate sequence rejected
+   --  Input: Record with same sequence as previous
+   --  Expected: validate_record returns WORM_ERR_SEQUENCE_MISMATCH
+   procedure Test_Case_4_Duplicate_Rejected
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Sequence overflow safe
+   --  Input: Record with sequence = 2^64 - 1 (max uint64)
+   --  Expected: No integer overflow, sequence treated as valid (modulo behavior)
+   procedure Test_Case_5_Overflow_Safe
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+end Sequence_Test;

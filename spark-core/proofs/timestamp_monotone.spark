@@ -1,0 +1,61 @@
+-- SPARK Proof: Timestamp Monotonicity Invariant
+-- Theorem: timestamp_new >= timestamp_previous
+--
+-- Proof Strategy:
+-- 1. Precondition: timestamps are non-decreasing Unix seconds
+-- 2. Each record has timestamp >= previous record's timestamp
+-- 3. Postcondition: monotone sequence of timestamps
+-- 4. Invariant holds: no temporal reversals
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+use Invariants;
+
+package Timestamp_Monotone_Proof is
+
+   --  Lemma: Time Non-Decreasing
+   --  For any two timestamps, monotone invariant ensures ordering.
+   procedure Lemma_Time_Non_Decreasing
+      (TS_Prev : in Timestamp;
+       TS_New : in Timestamp)
+   with
+      Global => null,
+      Pre => (Invariant_Timestamp_Monotone (TS_Prev, TS_New)),
+      Post => (TS_New >= TS_Prev);
+
+   --  Theorem: Temporal Ordering Chain
+   --  For a sequence of records, timestamps form non-decreasing chain.
+   procedure Theorem_Timestamp_Chain
+      (TS_1 : in Timestamp;
+       TS_2 : in Timestamp;
+       TS_3 : in Timestamp)
+   with
+      Global => null,
+      Pre => (Invariant_Timestamp_Monotone (TS_1, TS_2)
+         and Invariant_Timestamp_Monotone (TS_2, TS_3)),
+      Post => (TS_1 <= TS_2 and TS_2 <= TS_3);
+
+   --  Corollary: No Time Reversals
+   --  Temporal order is consistent across all records in stream.
+   procedure Corollary_No_Time_Reversals
+      (Writer : in Writer_Type;
+       New_Record : in Record_Type)
+   with
+      Global => null,
+      Pre => (Invariant_Timestamp_Monotone (Writer.Timestamp, New_Record.Timestamp)),
+      Post => (New_Record.Timestamp >= Writer.Timestamp);
+
+   --  Lemma: Causality Preserved
+   --  If timestamp is non-decreasing, causality edges are valid for replication.
+   procedure Lemma_Causality_Preserved
+      (Local_Record : in Record_Type;
+       Replicated_Record : in Record_Type)
+   with
+      Global => null,
+      Pre => (Invariant_Timestamp_Monotone (Local_Record.Timestamp,
+         Replicated_Record.Timestamp)),
+      Post => (Replicated_Record.Timestamp >= Local_Record.Timestamp);
+
+end Timestamp_Monotone_Proof;

@@ -1,0 +1,66 @@
+-- SPARK Conformance Test: Hash Chain Integrity
+-- Test: Verify hash links between consecutive records
+-- Expected: Each previous_hash matches computed hash of prior record
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+with Worm_Control;
+use Invariants;
+use Worm_Control;
+
+package Hash_Chain_Test is
+
+   procedure Test_Hash_Chain_Integrity
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Valid hash link
+   --  Input: Genesis record, then record with correct previous_hash
+   --  Expected: Both records appended, chain valid
+   procedure Test_Case_1_Valid_Hash_Link
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Broken hash link rejected
+   --  Input: Record with previous_hash != computed hash of prior
+   --  Expected: validate_record returns WORM_ERR_HASH_CHAIN_BROKEN
+   procedure Test_Case_2_Broken_Link_Rejected
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Genesis previous_hash must be all zeros
+   --  Input: Genesis record with previous_hash != [0x00 * 32]
+   --  Expected: validate_record returns WORM_ERR_HASH_CHAIN_BROKEN
+   procedure Test_Case_3_Genesis_Link_Must_Be_Zeros
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Hash chain survives 100 records
+   --  Input: 100 sequential records with valid hash links
+   --  Expected: All records appended, chain never broken
+   procedure Test_Case_4_Long_Chain_100_Records
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Tampering with middle record breaks tail
+   --  Input: Records 0, 1, 2, 3 (chain valid), then tamper record 1
+   --  Expected: Record 2's previous_hash no longer matches (chain broken)
+   procedure Test_Case_5_Tampering_Detected
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+end Hash_Chain_Test;

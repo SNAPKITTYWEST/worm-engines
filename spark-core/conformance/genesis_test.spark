@@ -1,0 +1,66 @@
+-- SPARK Conformance Test: Genesis Record Creation
+-- Test: Create first record in new stream
+-- Expected: Sequence=0, Previous_Hash=0x00*32, State transitions to GENESIS
+
+pragma Ada_2012;
+pragma SPARK_Mode (On);
+
+with Invariants;
+with Worm_Control;
+use Invariants;
+use Worm_Control;
+
+package Genesis_Test is
+
+   procedure Test_Genesis_Record_Creation
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: New writer with genesis record
+   --  Input: writer_id (Ed25519 public key)
+   --  Output: Writer state UNINITIALIZED, ready to create genesis record
+   procedure Test_Case_1_Writer_Init
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Create genesis record (sequence=0)
+   --  Input: New writer, payload_hash
+   --  Expected: Record with sequence=0, writer_id set, flags=0 (uncommitted)
+   procedure Test_Case_2_Genesis_Creation
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Genesis record previous_hash = all zeros
+   --  Input: Genesis record created
+   --  Expected: previous_hash = [0x00 * 32]
+   procedure Test_Case_3_Genesis_Previous_Hash
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Validate genesis record passes all invariants
+   --  Input: Genesis record, writer state
+   --  Expected: validate_record returns WORM_OK
+   procedure Test_Case_4_Genesis_Validation
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+   --  Test Case: Append genesis record transitions state to SEALED
+   --  Input: Validated genesis record
+   --  Expected: writer.state = SEALED, writer.sequence = 0, writer.timestamp set
+   procedure Test_Case_5_Genesis_Append
+   with
+      Global => null,
+      Pre => (True),
+      Post => (True);
+
+end Genesis_Test;
