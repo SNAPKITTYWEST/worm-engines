@@ -1,60 +1,70 @@
-WORM Engines — Dual Licensing
-
-This software is licensed under BOTH:
-1. Sovereign Source License (proprietary commercial)
-2. Business Source License (BSL 1.1) with change date 2027-12-31
-
-COMMERCIAL LICENSE ONLY
-
-These WORM engines are proprietary, commercial software. All rights reserved.
-
-Copyright © 2026 Sovereign Source Foundation.
-Legal representation: CARTO Legal Services.
-
----
-
-Sovereign Source License
-
-This software and documentation are proprietary and confidential.
-Unauthorized copying, modification, or distribution is prohibited.
-
-Permitted use:
-- Commercial license holders only
-- Internal use within licensed organization
-- Licensed recipients and authorized contractors
-
-Prohibited use:
-- Open source projects
-- Competing products
-- Reverse engineering
-- Redistribution without license
-- Benchmarking or performance testing without consent
-
-For licensing inquiries: legal@sovereigncode.dev
-
----
-
 Business Source License 1.1
 
-Terms: https://mariadb.com/bsl11/
+License text copyright (c) 2020, Elastic or its affiliates (https://www.elastic.co).
+Licensed to the public under the Commons Clause License, version 1.0 or later.
+
+Terms
+
+The Licensor hereby grants you the right to copy, modify, create derivative works,
+redistribute, and make non-production use of the Licensed Work. The Licensor may
+make an Additional Use Grant, above, permitting limited production use.
+
+Effective on the Change Date, or the fourth anniversary of the first publicly
+available distribution of a specific version of the Licensed Work under this
+License, whichever comes first.
+
+If the Licensor has not made an Additional Use Grant, then it becomes
+unavailable as of the Change Date.
 
 Change Date: December 31, 2027
-Change License: Apache 2.0
 
-Until the Change Date, you may not use this software except:
-1. As part of an authorized commercial license from Sovereign Source Foundation
-2. In compliance with the restrictions above
+Change License: GNU Affero General Public License v3.0 or later
 
-On or after the Change Date, this software will be available under Apache 2.0.
+Notice
 
----
+Business Source License Version 1.1
 
-NO WARRANTY
+This code is available under the Business Source License 1.1. For commercial use,
+see the Commercial License or contact licensing@snapkittywest.dev.
 
-THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.
-IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR DAMAGES.
+Notice of Change: This Software will become available under AGPL-3.0-only
+as of December 31, 2027.
 
-By using this software, you acknowledge:
-1. You are a licensed commercial entity
-2. You accept all terms above
-3. You indemnify Sovereign Source Foundation from liability
+Additional Use Grant: Evaluation licenses and internal business use permitted.
+For production use, see Commercial License Terms.
+
+Restrictions
+
+You may not offer the Licensed Work to third parties as a SaaS, hosted, or
+managed service, where the operation of the Licensed Work is under the control
+or oversight of a third party and Your users are not directly managing the
+Licensed Work.
+
+You may not move, change, disable, or circumvent any license key functionality
+in the Licensed Work.
+
+Disclaimer of Warranties
+
+THE LICENSED WORK IS PROVIDED ON AN "AS-IS" BASIS. LICENSOR HEREBY DISCLAIMS
+ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE,
+INCLUDING WITHOUT LIMITATION ANY WARRANTIES OF TITLE, FITNESS FOR A PARTICULAR
+PURPOSE, NON-INFRINGEMENT, OR ERROR-FREE OPERATION.
+
+Limitation of Liability
+
+IN NO EVENT AND UNDER NO LEGAL THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE),
+CONTRACT OR OTHERWISE, UNLESS REQUIRED BY APPLICABLE LAW (SUCH AS DELIBERATE
+AND GROSSLY NEGLIGENT ACTS), SHALL EITHER LICENSOR BE LIABLE TO YOU FOR DAMAGES,
+INCLUDING ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+OF ANY CHARACTER ARISING AS A RESULT OF THIS LICENSE OR OUT OF THE USE OR
+INABILITY TO USE THE LICENSED WORK.
+
+Termination
+
+If you violate any provision of this License, the rights granted to you terminate
+automatically.
+
+Commercial License
+
+For production use, SaaS hosting, or other commercial purposes, a separate
+Commercial License is required. Contact: licensing@snapkittywest.dev
