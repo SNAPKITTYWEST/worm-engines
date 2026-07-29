@@ -1,0 +1,24 @@
+WORM FABRIC C ABI — STEP 2 COMPLETE
+=
+LOCATION: /tmp/worm-engines/abi/
+
+DELIVERABLES:
+
+1. worm_abi.h (97 lines)
+   - C99 standard compatible
+   - Zero external dependencies
+   - 16 error codes (matching spec/invariants.md)
+   - 6 fixed-size type definitions
+   - 2 opaque types (WormWriter, WormRecord)
+   - 11 exported functions (all 11 required)
+   - Production-ready, no TBD stubs
+
+2. README.md (145 lines)
+   - 11 core functions overview
+   - Error model documentation
+   - Key properties (deterministic, thread-safe)
+   - Hash domain specification (180 bytes, deterministic)
+   - CBOR encoding rules
+   - Typical C workflow example
+   - All 12 invariants enforcement
+   - Language binding guidance
