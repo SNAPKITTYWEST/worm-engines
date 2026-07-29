@@ -1,0 +1,5 @@
+(executable
+ (name policy_cli)
+ (public_name worm-policy)
+ (modules policy_cli)
+ (libraries worm_policy))
