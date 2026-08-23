@@ -84,14 +84,27 @@ pub fn checkPolicyMonotone(writer: *WormWriter, record: *const WormRecord) !void
     }
 }
 
-/// Invariant 7: Signature Validity
-/// signature_valid(record, writer_id) = true
-pub fn checkSignatureValid(record: *const WormRecord) !void {
-    const ed25519 = @import("ed25519.zig");
-    ed25519.verifySignature(record, record.writer_id) catch {
-        std.debug.print("Signature verification failed\n", .{});
-        return InvariantError.SignatureInvalid;
-    };
+/// Invariant 7: Signature Validity (ML-DSA-44, post-quantum)
+/// Signature is verified against the ML-DSA public key stored in the keystore.
+/// The record's writer_id is the identity hash of the public key — callers
+/// must resolve writer_id → public_key before calling this invariant.
+/// If public_key is null, the record is treated as unsigned (flags PQ_SIGNED
+/// must be clear, otherwise this is a violation).
+pub fn checkSignatureValid(record: *const WormRecord, public_key: ?*const [1312]u8) !void {
+    const pq = @import("pq_sign.zig");
+    if (public_key) |pk| {
+        pq.verifySignature(record, pk) catch {
+            std.debug.print("ML-DSA signature verification failed\n", .{});
+            return InvariantError.SignatureInvalid;
+        };
+    } else {
+        // No public key available — only valid if record is not marked PQ_SIGNED
+        const PQ_SIGNED: u32 = 0x02;
+        if ((record.flags & PQ_SIGNED) != 0) {
+            std.debug.print("Record marked PQ_SIGNED but no public key provided\n", .{});
+            return InvariantError.SignatureInvalid;
+        }
+    }
 }
 
 /// Invariant 8: Payload Commitment
@@ -139,13 +152,14 @@ pub fn checkGenesisUnique(is_genesis: bool, stream_initialized: bool) !void {
     }
 }
 
-/// Validate all applicable invariants for a new record
-pub fn validateAll(writer: *WormWriter, record: *const WormRecord) !void {
+/// Validate all applicable invariants for a new record.
+/// public_key: the ML-DSA-44 public key for this writer, or null to skip sig check.
+pub fn validateAll(writer: *WormWriter, record: *const WormRecord, public_key: ?*const [1312]u8) !void {
     // Genesis record (sequence = 0)
     if (record.sequence == 0) {
         try checkGenesisUnique(true, writer.isInitialized());
         try checkWriterStable(writer, record);
-        try checkSignatureValid(record);
+        try checkSignatureValid(record, public_key);
         return;
     }
 
@@ -159,7 +173,7 @@ pub fn validateAll(writer: *WormWriter, record: *const WormRecord) !void {
     try checkHashChain(writer, record);
     try checkWriterStable(writer, record);
     try checkPolicyMonotone(writer, record);
-    try checkSignatureValid(record);
+    try checkSignatureValid(record, public_key);
 }
 
 test "sequence monotonicity" {

@@ -8,10 +8,11 @@ const constants = @import("constants.zig");
 const cbor = @import("cbor.zig");
 const WormRecord = @import("record.zig").WormRecord;
 
-/// Maximum CBOR-encoded size for a single record.
-/// 11-field map: headers + field names + payload.
-/// Computed: ~512 bytes is safe for all current field sizes.
-pub const MAX_ENCODED_SIZE: usize = 512;
+/// Maximum CBOR-encoded size for a single LOCKER record.
+/// ML-DSA-44 signature = 2420 bytes + CBOR overhead ~10 bytes
+/// All other fields total ~350 bytes with CBOR headers.
+/// 3072 bytes is safe with margin.
+pub const MAX_ENCODED_SIZE: usize = 3072;
 
 /// Encode a constants.Record to CBOR, returning an allocator-owned slice.
 /// Caller must free the returned slice.

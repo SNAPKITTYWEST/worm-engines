@@ -3,10 +3,10 @@
 // storage.zig, abi.zig, and segment.zig.
 
 const std = @import("std");
+const ml = @import("ml_dsa.zig");
 
-/// The canonical WORM record type used by the storage and ABI layers.
-/// This mirrors WormRecord in record.zig but is the flat C-ABI-safe version
-/// used for encode/decode operations in the storage layer.
+/// The canonical LOCKER record type used by the storage and ABI layers.
+/// Signature field is ML-DSA-44 (2420 bytes, post-quantum, NIST FIPS 204).
 pub const Record = struct {
     version: u32,
     stream_id: [32]u8,
@@ -15,10 +15,10 @@ pub const Record = struct {
     previous_hash: [32]u8,
     payload_hash: [32]u8,
     policy_hash: [32]u8,
-    writer_id: [32]u8,
+    writer_id: [32]u8,      // H(ml_dsa_public_key || "LOCKER-WRITER-ID-v1")
     receipt_id: [32]u8,
     flags: u32,
-    signature: [64]u8,
+    signature: [ml.SIG_LEN]u8,  // ML-DSA-44: 2420 bytes
 
     pub fn isGenesis(self: *const Record) bool {
         return self.sequence == 0;
