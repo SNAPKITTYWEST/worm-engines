@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+  <!-- Transparent background -->
+  <rect width="512" height="512" fill="transparent"/>
+
+  <!-- Link 1: Left segment -->
+  <path d="M 120,150 L 180,120 L 240,120 L 280,150 L 260,220 L 280,290 L 240,320 L 180,320 L 140,290 L 160,220 Z"
+        fill="none" stroke="#E7E7EA" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Link 2: Center segment (overlapping) -->
+  <path d="M 180,80 L 280,40 L 380,80 L 400,180 L 380,280 L 280,320 L 180,280 L 160,180 Z"
+        fill="none" stroke="#E7E7EA" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>
+
+  <!-- Link 3: Right segment (ascending) -->
+  <path d="M 280,20 L 400,80 L 460,150 L 480,260 L 460,370 L 400,420 L 280,380 L 260,260 Z"
+        fill="none" stroke="#E7E7EA" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" opacity="0.75"/>
+
+  <!-- Chain continuity accent -->
+  <path d="M 100,220 Q 220,270 480,200" fill="none" stroke="#E7E7EA" stroke-width="3" opacity="0.3" stroke-dasharray="8,8"/>
+
+  <!-- Center integrity dot -->
+  <circle cx="256" cy="220" r="12" fill="#E7E7EA"/>
+
+  <!-- Accessibility -->
+  <title>WORM Engines Mark (Monochrome)</title>
+  <desc>Monochrome version of the WORM Engines emblem for documentation, seals, terminal output, and print.</desc>
+</svg>

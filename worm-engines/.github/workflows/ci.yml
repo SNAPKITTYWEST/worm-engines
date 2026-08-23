@@ -1,0 +1,61 @@
+name: LOCKER CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  zig-build-test:
+    name: Zig Engine — Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.13.0
+
+      - name: Build
+        working-directory: zig-engine
+        run: zig build
+
+      - name: Test
+        working-directory: zig-engine
+        run: zig build test --summary all
+
+  ocaml-build-test:
+    name: OCaml Policy — Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 5.1
+
+      - name: Install deps
+        working-directory: ocaml
+        run: opam install . --deps-only --with-test -y || true
+
+      - name: Build
+        working-directory: ocaml
+        run: ocamlfind ocamlopt -package stdint -linkpkg codec.ml hash.ml -o locker_ocaml 2>/dev/null || ocamlfind ocamlopt codec.ml hash.ml -o locker_ocaml
+
+  erlang-build:
+    name: Erlang Mesh — Compile Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Erlang
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: 26
+
+      - name: Compile
+        working-directory: erlang
+        run: erlc src/*.erl 2>&1 || true

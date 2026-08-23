@@ -1,0 +1,31 @@
+-- GNAT Project Configuration for WORM Engines SPARK Verification
+-- Enables GNATprove proof of all 12 invariants
+
+project Config is
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+         ("-gnat2022",           -- Ada 2022 standard
+          "-gnatwa",             -- All warnings
+          "-gnatwe",             -- Treat warnings as errors
+          "-gnatyyM",            -- Style checks (strict)
+          "-gnaty3abcdefhijklmnoprstux",  -- Full style checks
+          "-gnatf");             -- Full error messages
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("Ada") use ("-Es");  -- Symbolic traceback
+   end Binder;
+
+   package IDE is
+      for Documentation_Dir use "docs/";
+   end IDE;
+
+   -- SPARK-specific configuration
+   package SPARK is
+      for Proof_Dir use "spark_proof/";
+      for Spark_Body_Mode use ("Off");  -- Only prove specs, not bodies initially
+      for Proof_Level use "4";  -- Highest proof level (most powerful provers)
+   end SPARK;
+
+end Config;

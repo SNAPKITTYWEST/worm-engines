@@ -1,0 +1,59 @@
+; Canonical wire format. All implementations must produce identical CBOR bytes for identical input.
+; Deterministic serialization is mandatory. No field ordering variation, no optional fields.
+; This is the immutable contract that every WORM engine must honor.
+
+WormRecord = {
+  version: uint32,
+  stream_id: bytes .size 32,
+  sequence: uint64,
+  timestamp: uint64,
+  previous_hash: bytes .size 32,
+  payload_hash: bytes .size 32,
+  policy_hash: bytes .size 32,
+  writer_id: bytes .size 32,
+  receipt_id: bytes .size 32,
+  flags: uint32,
+  signature: bytes .size 64
+}
+
+; Field constraints and semantics:
+; version: Monotonic version counter. Current: 1. Increment only for wire format breaking changes.
+; stream_id: SHA-256 hash of stream descriptor. Fixed at stream creation. Immutable.
+; sequence: Zero-indexed position in stream. Must equal previous_sequence + 1 (except genesis record where sequence = 0).
+; timestamp: Unix seconds (uint64). Must be >= previous_timestamp. Enforced at validation.
+; previous_hash: SHA-256 of prior record (version || stream_id || sequence-1 || timestamp || previous_hash_of_prior || ...).
+;               For genesis record (sequence=0): all zero bytes (32 bytes of 0x00).
+; payload_hash: SHA-256 of application payload (user-defined, opaque to engine).
+; policy_hash: SHA-256 of enforcement policy at this sequence point. Monotonic versioning: policy_new >= policy_old.
+; writer_id: Ed25519 public key (32 bytes). Identifies signer. Fixed per stream.
+; receipt_id: Blake3 hash of receipt data (3rd-party witness, optional). Zero bytes (0x00 * 32) if no receipt.
+; flags: Bit field. Bit 0: committed (1) / uncommitted (0). Bits 1-31: reserved, must be zero in valid records.
+; signature: Ed25519 signature over hash-domain (88 bytes deterministic: domain_tag || version || stream_id || sequence || previous_hash || payload_hash || policy_hash || writer_id || flags).
+
+; Serialization order (CBOR canonical encoding):
+; 1. Encode as CBOR map with definite length (11 fields).
+; 2. Sort keys by CBOR major type, then by value.
+; 3. For all text string keys used here (if any), encode as UTF-8 bytes.
+; 4. Integer keys must be sorted numerically in ascending order.
+; 5. All byte strings must use definite-length encoding (not indefinite).
+; 6. No canonical CBOR tag markers allowed (use raw bytes).
+
+; Example CBOR structure (pseudo-code):
+; {
+;   "version": 1,
+;   "stream_id": 0x5820 <32 random bytes>,
+;   "sequence": 42,
+;   "timestamp": 1688121600,
+;   "previous_hash": 0x5820 <32 bytes>,
+;   "payload_hash": 0x5820 <32 bytes>,
+;   "policy_hash": 0x5820 <32 bytes>,
+;   "writer_id": 0x5820 <32 bytes>,
+;   "receipt_id": 0x5820 <32 zero bytes>,
+;   "flags": 1,
+;   "signature": 0x5840 <64 bytes>
+; }
+
+; Determinism guarantee:
+; For any two implementations fed the same WormRecord values, the CBOR serialization must be
+; byte-for-byte identical. Any deviation is a bug in one or both implementations.
+; Test: sha256(cbor_encode(record_a)) == sha256(cbor_encode(record_b)) iff records are equal.
