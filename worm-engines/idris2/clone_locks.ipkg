@@ -1,0 +1,17 @@
+package clone_locks
+
+version     = "1.0.0"
+license     = "BSL-1.1"
+authors     = "Ahmad Ali Parr, Jessica L. Williams"
+maintainers = "snapkittywest@pm.me"
+homepage    = "https://github.com/SNAPKITTYWEST/worm-engines"
+description = "Cryptographic clone locks via Idris 2 linear types + hardware attestation"
+
+depends = [base]
+
+modules =
+  NoClone,
+  CloneDetection,
+  Bifrost_Integration
+
+idris2Opts = "--warnreach"
