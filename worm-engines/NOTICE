@@ -1,0 +1,23 @@
+LOCKER — Post-Quantum Append-Only Ledger
+Copyright (C) 2026 Ahmad Ali Parr, Jessica L. Williams
+SNAPKITTYWEST / Bel Esprit D'Accord Irrevocable Trust
+
+Licensed under the Sovereign Tri-License:
+  AGPL-3.0-only          — open source / community use
+  BSL 1.1 → MIT          — commercial use, converts 2029-01-01
+  MIT                    — after 2029-01-01
+
+See LICENSE for the full text of all three licenses.
+See PATENTS.md for the list of six protected inventions.
+See DEFENSIVE_PUBLICATION.md for the full prior art disclosure.
+
+This software implements six patent-pending inventions:
+  1. ML-DSA-44 post-quantum WORM sealing (NIST FIPS 204)
+  2. Multiplicity-based thickness metric for sovereignty enforcement
+  3. PCSL-gated SUBLEQ transition with contractivity envelope
+  4. ERE five-pass filtration integrated into append-only commit path
+  5. RegHom Merkle-anchored morphism registry
+  6. Prime-vector commitment with IPA-compatible update stability
+
+Part of the Sovereign Stack:
+  https://snapkittywest.github.io/hyperkitty/papers/sovereign-stack-unified.pdf
