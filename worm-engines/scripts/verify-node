@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""
+LOCKER Node Authorization Verification (ML-DSA-44)
+
+Verifies that this node holds a valid, active, non-expired authorization
+from the LOCKER authority. Uses ML-DSA-44 (NIST FIPS 204).
+
+Exit codes:
+  0 = Node authorized and active
+  1 = Node not authorized or authorization invalid
+  2 = Script error
+
+sovereign/authorization.json must exist and contain:
+  - authorization_id
+  - node_id
+  - authorization_status = "ACTIVE"
+  - node_public_key_hex  (ML-DSA-44, 2624 hex chars)
+  - issued_at
+  - expires_at  (or "never")
+  - authority_signature_hex (ML-DSA-44 sig over canonical JSON, 4840 hex chars)
+
+Authors: Ahmad Ali Parr, Jessica L. Williams (SNAPKITTYWEST)
+"""
+
+import json, os, subprocess, sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+MLDSA_PK_HEX  = 1312 * 2
+MLDSA_SIG_HEX = 2420 * 2
+
+EXIT_OK = 0; EXIT_DENIED = 1; EXIT_ERROR = 2
+
+def mldsa_verify(pk, msg, sig):
+    try:
+        from dilithium_py.dilithium import Dilithium2
+        return Dilithium2.verify(pk, msg, sig)
+    except ImportError:
+        pass
+    binary = os.environ.get("LOCKER_MLDSA_VERIFY_BIN", "locker_verify_mldsa")
+    try:
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d/"pk.bin").write_bytes(pk)
+            (d/"msg.bin").write_bytes(msg)
+            (d/"sig.bin").write_bytes(sig)
+            r = subprocess.run([binary, str(d/"pk.bin"), str(d/"msg.bin"), str(d/"sig.bin")],
+                               capture_output=True, timeout=10)
+            return r.returncode == 0
+    except Exception:
+        return False
+
+def verify_node(repo_root):
+    sovereign = repo_root / "sovereign"
+    print("========================================")
+    print("LOCKER NODE AUTHORIZATION (ML-DSA-44)")
+    print("========================================\n")
+
+    # [1] Load authorization record
+    print("[1] Loading authorization record...")
+    auth_file = sovereign / "authorization.json"
+    if not auth_file.exists():
+        print("  DENIED: sovereign/authorization.json not found")
+        print("          This node is not provisioned.")
+        print("          Contact jessica@collectivekitty.com to request a node key.")
+        return EXIT_DENIED
+    try:
+        auth = json.loads(auth_file.read_text())
+    except json.JSONDecodeError as e:
+        print(f"  ERROR: {e}"); return EXIT_ERROR
+
+    node_id = auth.get("node_id","")
+    status  = auth.get("authorization_status","").upper()
+    print(f"  Node ID:    {node_id}")
+    print(f"  Auth ID:    {auth.get('authorization_id','')}")
+    print(f"  Status:     {status}")
+    print(f"  Issued:     {auth.get('issued_at','')}")
+    print(f"  Expires:    {auth.get('expires_at','')}\n")
+
+    # [2] Status check
+    print("[2] Checking authorization status...")
+    if status != "ACTIVE":
+        print(f"  DENIED: Status is {status} (required: ACTIVE)")
+        return EXIT_DENIED
+    print("  OK: ACTIVE\n")
+
+    # [3] Expiry check
+    print("[3] Checking expiry...")
+    expires = auth.get("expires_at","never")
+    if expires.lower() != "never":
+        try:
+            exp = datetime.fromisoformat(expires.replace("Z","+00:00"))
+            if exp < datetime.now(timezone.utc):
+                print(f"  DENIED: Authorization expired at {expires}")
+                return EXIT_DENIED
+        except ValueError:
+            print(f"  ERROR: Invalid expires_at: {expires}"); return EXIT_ERROR
+    print("  OK: Not expired\n")
+
+    # [4] ML-DSA-44 signature on authorization record
+    print("[4] Verifying authority ML-DSA-44 signature...")
+    sig_hex = auth.get("authority_signature_hex","")
+    if not sig_hex:
+        print("  DENIED: No authority_signature_hex in authorization.json")
+        return EXIT_DENIED
+    if len(sig_hex) != MLDSA_SIG_HEX:
+        print(f"  DENIED: Signature must be {MLDSA_SIG_HEX} hex chars"); return EXIT_DENIED
+
+    pk_hex = os.environ.get("LOCKER_MLDSA_PUBLIC_KEY_HEX","") or \
+             os.environ.get("PAX_MLDSA_PUBLIC_KEY_HEX","")
+    if not pk_hex:
+        pk_file = sovereign / "mldsa_authority.pub"
+        if pk_file.exists():
+            pk_hex = pk_file.read_text().strip()
+    if not pk_hex:
+        print("  ERROR: No LOCKER authority public key")
+        print("         Set LOCKER_MLDSA_PUBLIC_KEY_HEX or create sovereign/mldsa_authority.pub")
+        return EXIT_ERROR
+
+    # Message: canonical JSON of auth record without the signature field
+    auth_without_sig = {k: v for k, v in auth.items() if k != "authority_signature_hex"}
+    message = json.dumps(auth_without_sig, separators=(",",":"), sort_keys=True).encode()
+
+    try:
+        pk  = bytes.fromhex(pk_hex)
+        sig = bytes.fromhex(sig_hex)
+    except ValueError:
+        print("  ERROR: Non-hex characters"); return EXIT_ERROR
+
+    if mldsa_verify(pk, message, sig):
+        print("  OK: Authority signature VALID (ML-DSA-44)\n")
+    else:
+        print("  DENIED: Authority signature INVALID")
+        print("          Authorization record may be forged or tampered")
+        return EXIT_DENIED
+
+    print("========================================")
+    print(f"STATUS: NODE AUTHORIZED (ML-DSA-44)")
+    print(f"        Node: {node_id}")
+    print("========================================")
+    return EXIT_OK
+
+if __name__ == "__main__":
+    root = Path(__file__).resolve().parent.parent
+    sys.exit(verify_node(root))

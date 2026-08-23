@@ -138,6 +138,61 @@ worm-engines/
 
 ---
 
+## Clone Protection
+
+Verify your clone matches an official release before use:
+
+```bash
+# Quick verify (commit + manifest hash)
+python3 scripts/verify-clone
+
+# Full ML-DSA-44 verification (requires provisioned node key)
+LOCKER_MLDSA_PUBLIC_KEY_HEX=<authority_key_hex> python3 scripts/verify-clone
+```
+
+Expected output (provisioned node):
+```
+========================================
+STATUS: AUTHENTIC LOCKER RELEASE
+        ML-DSA-44 verified (FIPS 204)
+========================================
+```
+
+**Do NOT use a release that fails verification.**  
+See [LOCKER_NODE_KEY.md](LOCKER_NODE_KEY.md) for provisioning instructions.
+
+---
+
+## Node Authorization
+
+Production deployment requires a provisioned Sovereign Node Key (ML-DSA-44).
+
+```bash
+# Verify this node is authorized for production
+python3 scripts/verify-node
+```
+
+Expected output (authorized node):
+```
+========================================
+STATUS: NODE AUTHORIZED (ML-DSA-44)
+        Node: <your-node-id>
+========================================
+```
+
+**Commercial tiers:**
+
+| Tier | Price | Scope |
+|------|-------|-------|
+| Individual Node | $250–$500 | One production server |
+| Commercial Team | $12,000–$25,000/yr | Unlimited nodes |
+| Enterprise | $50,000–$150,000+/yr | Custom SLA + audits |
+
+Contact: jessica@collectivekitty.com  
+Details: [LOCKER_NODE_KEY.md](LOCKER_NODE_KEY.md)
+
+---
+
 ## Run
 
 ```bash

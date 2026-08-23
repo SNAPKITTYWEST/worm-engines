@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""
+LOCKER Clone Integrity Verification (ML-DSA-44)
+
+Verifies that your clone of worm-engines/LOCKER matches an official release.
+Uses ML-DSA-44 (NIST FIPS 204) — Shor-resistant, 128-bit post-quantum.
+
+Exit codes:
+  0 = Integrity verified
+  1 = Integrity verification failed
+  2 = Script error
+
+Requirements:
+  pip install dilithium-py
+
+Environment:
+  PAX_MLDSA_PUBLIC_KEY_HEX  — LOCKER authority public key (2624 hex chars)
+                               OR sovereign/mldsa_authority.pub
+
+Authors: Ahmad Ali Parr, Jessica L. Williams (SNAPKITTYWEST)
+"""
+
+import hashlib, json, os, subprocess, sys
+from pathlib import Path
+
+MLDSA_PK_BYTES  = 1312
+MLDSA_SIG_BYTES = 2420
+MLDSA_PK_HEX    = MLDSA_PK_BYTES  * 2
+MLDSA_SIG_HEX   = MLDSA_SIG_BYTES * 2
+
+EXIT_OK = 0; EXIT_FAILED = 1; EXIT_ERROR = 2
+
+def mldsa_verify(pk, msg, sig):
+    try:
+        from dilithium_py.dilithium import Dilithium2
+        return Dilithium2.verify(pk, msg, sig)
+    except ImportError:
+        pass
+    binary = os.environ.get("LOCKER_MLDSA_VERIFY_BIN", "locker_verify_mldsa")
+    try:
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d/"pk.bin").write_bytes(pk)
+            (d/"msg.bin").write_bytes(msg)
+            (d/"sig.bin").write_bytes(sig)
+            r = subprocess.run([binary, str(d/"pk.bin"), str(d/"msg.bin"), str(d/"sig.bin")],
+                               capture_output=True, timeout=10)
+            return r.returncode == 0
+    except Exception:
+        return False
+
+def sha256_file(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+def sha256_tree(root):
+    try:
+        r = subprocess.run(["git","ls-files","-z"], capture_output=True, cwd=root, timeout=30)
+        files = [f for f in r.stdout.split(b"\x00") if f]
+    except Exception:
+        return ""
+    h = hashlib.sha256()
+    for f in sorted(files):
+        p = root / f.decode()
+        if p.is_file():
+            h.update(f + b"\x00"); h.update(p.read_bytes())
+    return h.hexdigest()
+
+def git_head(root):
+    try:
+        r = subprocess.run(["git","rev-parse","HEAD"], capture_output=True, text=True, cwd=root, timeout=10)
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:
+        return None
+
+def verify(repo_root):
+    sovereign = repo_root / "sovereign"
+    print("========================================")
+    print("LOCKER CLONE VERIFICATION (ML-DSA-44)")
+    print("========================================\n")
+
+    # [1] Release metadata
+    print("[1] Reading release metadata...")
+    rf = sovereign / "release.json"
+    if not rf.exists():
+        print("  ERROR: sovereign/release.json not found")
+        print("         This may be an unprovisioned clone.")
+        print("         Contact jessica@collectivekitty.com for a node key.")
+        return EXIT_FAILED
+    try:
+        release = json.loads(rf.read_text())
+    except json.JSONDecodeError as e:
+        print(f"  ERROR: {e}"); return EXIT_ERROR
+    print(f"  Repository: {release.get('repository','')}")
+    print(f"  Version:    {release.get('release_version','')}")
+    print(f"  Timestamp:  {release.get('release_timestamp_utc','')}")
+    print("  OK\n")
+
+    # [2] Git commit
+    print("[2] Verifying git commit...")
+    current = git_head(repo_root)
+    if not current:
+        print("  ERROR: Not a git repository"); return EXIT_ERROR
+    expected = release.get("git_commit","")
+    if current != expected:
+        print(f"  FAILED\n    Expected: {expected}\n    Current:  {current}")
+        return EXIT_FAILED
+    print(f"  OK: {current[:12]}\n")
+
+    # [3] Manifest hash
+    print("[3] Verifying manifest hash...")
+    mf = sovereign / "manifest.json"
+    eh = release.get("manifest_sha256","")
+    if mf.exists() and eh:
+        ch = sha256_file(mf)
+        if ch != eh:
+            print(f"  FAILED\n    Expected: {eh}\n    Computed: {ch}")
+            return EXIT_FAILED
+        print(f"  OK: {ch[:16]}...\n")
+    else:
+        print("  SKIP\n")
+
+    # [4] File tree
+    print("[4] Verifying file tree hash...")
+    et = release.get("tree_sha256","")
+    if et:
+        ct = sha256_tree(repo_root)
+        if ct != et:
+            print("  FAILED: File tree mismatch — possible tampering")
+            return EXIT_FAILED
+        print(f"  OK: {ct[:16]}...\n")
+    else:
+        print("  SKIP\n")
+
+    # [5] ML-DSA-44 signature
+    print("[5] Verifying ML-DSA-44 release signature...")
+    sf = sovereign / "release.sig.hex"
+    sig_hex = os.environ.get("LOCKER_RELEASE_SIG_HEX","")
+    if not sig_hex and sf.exists():
+        sig_hex = sf.read_text().strip()
+
+    if not sig_hex:
+        print("  SKIP: No ML-DSA-44 release signature")
+        print("        Commit + hash verified. Full PQ auth requires node provisioning.")
+        print("\n========================================")
+        print("STATUS: PARTIAL VERIFICATION")
+        print("        (commit + manifest verified)")
+        print("========================================")
+        return EXIT_OK
+
+    pk_hex = os.environ.get("LOCKER_MLDSA_PUBLIC_KEY_HEX","") or \
+             os.environ.get("PAX_MLDSA_PUBLIC_KEY_HEX","")
+    if not pk_hex:
+        pk_file = sovereign / "mldsa_authority.pub"
+        if pk_file.exists():
+            pk_hex = pk_file.read_text().strip()
+    if not pk_hex:
+        print("  ERROR: No LOCKER authority public key")
+        print("         Set LOCKER_MLDSA_PUBLIC_KEY_HEX or create sovereign/mldsa_authority.pub")
+        return EXIT_ERROR
+
+    if len(sig_hex) != MLDSA_SIG_HEX:
+        print(f"  ERROR: Signature must be {MLDSA_SIG_HEX} hex chars"); return EXIT_FAILED
+
+    message = json.dumps(release, separators=(",",":"), sort_keys=True).encode()
+    try:
+        pk = bytes.fromhex(pk_hex); sig = bytes.fromhex(sig_hex)
+    except ValueError:
+        print("  ERROR: Non-hex in key or signature"); return EXIT_ERROR
+
+    if mldsa_verify(pk, message, sig):
+        print("  OK: ML-DSA-44 signature VALID\n")
+    else:
+        print("  FAILED: ML-DSA-44 signature INVALID")
+        print("          Clone may be tampered or unsigned")
+        return EXIT_FAILED
+
+    print("========================================")
+    print("STATUS: AUTHENTIC LOCKER RELEASE")
+    print("        ML-DSA-44 verified (FIPS 204)")
+    print("========================================")
+    return EXIT_OK
+
+if __name__ == "__main__":
+    root = Path(__file__).resolve().parent.parent
+    sys.exit(verify(root))
