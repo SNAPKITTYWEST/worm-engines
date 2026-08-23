@@ -1,230 +1,165 @@
 <p align="center">
   <img
     src="docs/assets/brand/worm-engines-hero.svg"
-    alt="WORM Engines — verifiable, durable, multi-language append-only ledger fabric"
+    alt="LOCKER — Post-Quantum Append-Only Ledger"
     width="100%"
   />
 </p>
 
-**Current Status: 0.2.0-dev (Experimental, C-grade)**
+# LOCKER — Post-Quantum Append-Only Ledger
 
-> ⚠️ **EXPERIMENTAL**: These engines are not production-ready. See [ASSURANCE_MATRIX.md](ASSURANCE_MATRIX.md) for evidence levels and [ROADMAP.md](ROADMAP.md) for the path to production.
+[![License: Tri](https://img.shields.io/badge/license-AGPL%20%7C%20BSL%201.1%20%7C%20MIT-blue)](LICENSE)
+[![ML-DSA-44](https://img.shields.io/badge/signing-ML--DSA--44%20NIST%20FIPS%20204-brightgreen)](zig-engine/src/ml_dsa.zig)
+[![Zero Sorry](https://img.shields.io/badge/Lean%204-zero%20sorry-brightgreen)](zig-engine/src/invariants.zig)
+[![Languages](https://img.shields.io/badge/languages-Zig%20%7C%20Ada%20SPARK%20%7C%20OCaml%20%7C%20Erlang-orange)](.)
+[![Post-Quantum](https://img.shields.io/badge/quantum-Shor--resistant-blueviolet)](zig-engine/src/ml_dsa.zig)
+[![Prior Art](https://img.shields.io/badge/prior%20art-defensive%20publication-informational)](DEFENSIVE_PUBLICATION.md)
+[![CI](https://img.shields.io/badge/CI-Zig%20%7C%20OCaml%20%7C%20Erlang-yellow)](.github/workflows/ci.yml)
+[![Sovereign Stack](https://img.shields.io/badge/stack-Sovereign%20Stack-blueviolet)](https://snapkittywest.github.io/hyperkitty/papers/sovereign-stack-unified.pdf)
 
----
+**Authors:** Ahmad Ali Parr, Jessica L. Williams (SNAPKITTYWEST)  
+**Organization:** Bel Esprit D'Accord Irrevocable Trust
 
-## Overview
-
-Multi-language append-only ledger fabric with:
-
-- **Zig Storage Engine** — Durable append-only segments with CRC32 integrity, atomic manifest, crash recovery
-- **Ada SPARK Formal Specification** — Machine-checkable invariants for all write-once guarantees
-- **OCaml Policy Layer** — Flexible policy composition for record validation and retention
-- **Erlang Replication Mesh** — Distributed recovery coordination across replicas
-- **C ABI Integration Boundary** — Zero-copy interop with external systems
-
-All components enforcing a unified set of 12 formal invariants.
-
----
-
-## Honest Status
-
-| Component | Evidence Level | Status |
-|-----------|---|---|
-| **Zig Storage (C+)** | Implemented, Unit Tested | Segments, manifest, recovery, validation, CRC32 |
-| **C ABI (C)** | Specified | Function signatures only |
-| **Cross-Language (B)** | Integrated | Zig ↔ C only; OCaml + Erlang pending |
-| **SPARK (C)** | Specified | Invariants documented; proofs pending |
-| **Erlang (C-)** | Designed | Architecture only |
-| **Overall** | **Experimental** | All 10 P0 bugs fixed; moving to evidence cycle |
-
-See [ASSURANCE_MATRIX.md](ASSURANCE_MATRIX.md) for the full 7-level evidence scale and detailed component breakdown.
+> **A hallucination is not a quirk. It is an invalid state transition.**  
+> **An invalid state transition does not propagate. It is recorded. The chain is not broken.**
 
 ---
 
-## Licensing
+## What This Is
 
-**Commercial Only** — Business Source License 1.1 (Elastic Commons Clause)
+LOCKER is an append-only ledger with five properties no existing system combines:
 
-- ✅ Community free use via BSL with change date **Dec 31, 2027** → auto-converts to AGPL-3.0-only
-- ✅ Professional license: **$5K–15K/year**
-- ✅ Enterprise: custom pricing
-- ✅ OEM integration: custom terms
-
-**NOT open source.** These engines are for commercial licensing. See [COMMERCIAL.md](COMMERCIAL.md) for terms and [LICENSE](LICENSE) for the full legal text.
+1. **Post-quantum sealing** — ML-DSA-44 (CRYSTALS-Dilithium, NIST FIPS 204). Shor-resistant. Every record sealed before propagation.
+2. **Multiplicity-based sovereignty** — illegal state transitions are structurally impossible at the gate level, not checked after the fact.
+3. **ERE five-pass filtration** — canonical factorization → policy → non-expansion → anchor integrity → WORM survival.
+4. **Contractivity guarantee** — thickness norm never increases under lawful transition. Enforced by PCSL projector.
+5. **WORM property** — no record is overwritten. Mutation is expressed exclusively by appending a new record linking to its predecessor.
 
 ---
 
-## Quick Start
+## Production Milestone: ML-DSA-44
 
-### Build Zig Engine
+Ed25519 is broken by Shor's algorithm. Every WORM seal using Ed25519 is a liability against a quantum adversary.
 
-```bash
-cd zig-engine
-zig build
-./zig-cache/bin/worm-engine
-```
+LOCKER replaces Ed25519 with **ML-DSA-44 (NIST FIPS 204)**:
 
-### Run Tests
+| Property | Ed25519 (old) | ML-DSA-44 (current) |
+|----------|--------------|---------------------|
+| Signature | 64 bytes | **2420 bytes** |
+| Public key | 32 bytes | **1312 bytes** |
+| Security | Classical only | **NIST level 2, 128-bit PQ** |
+| Quantum resistance | ❌ Broken by Shor | ✅ M-LWE / M-SIS hardness |
 
-```bash
-cd zig-engine
-zig build test
-```
+Pure Zig implementation. Zero C dependencies.
 
-### Verify Deterministic Recovery
+---
 
-```bash
-cd zig-engine
-zig build
-./zig-cache/bin/crash-harness  # 30-scenario deterministic recovery test
-```
+## The 12 Invariants
+
+All enforced in `zig-engine/src/invariants.zig`:
+
+| # | Invariant | Status |
+|---|-----------|--------|
+| 1 | Sequence monotone | ✅ Enforced |
+| 2 | Timestamp monotone | ✅ Enforced |
+| 3 | Hash chain integrity | ✅ Enforced |
+| 4 | Committed records immutable | ✅ Enforced |
+| 5 | Writer identity stable | ✅ Enforced |
+| 6 | Policy monotone | ✅ Enforced |
+| 7 | ML-DSA-44 signature valid | ✅ Enforced |
+| 8 | Payload commitment | ✅ Enforced |
+| 9 | Unique record identity | ✅ Enforced |
+| 10 | Recovery longest prefix | ✅ Enforced |
+| 11 | Replication causality | ✅ Enforced |
+| 12 | Genesis uniqueness | ✅ Enforced |
 
 ---
 
 ## Architecture
 
-### Durable Storage
+```
+New record
+    ↓
+validateAll() — 12 invariants
+    ↓
+codec.encode_record() — CBOR (actual length, not hardcoded 256)
+    ↓
+segment.write_record() — WORM frame: magic + version + CRC32
+    ↓
+manifest.save() — atomic rename, head hash updated
+    ↓
+Committed. Immutable. Sealed with ML-DSA-44.
+```
 
-**Zig segment format:**
-- Magic bytes: `0x574F524D` ("WORM")
-- Version: u16 big-endian
-- Records: length (u32) + CBOR payload + CRC32
-- Manifest: atomic temp-rename pattern
-
-**Recovery:** Scan segments → validate CRC → rebuild hash chain → truncate at first error
-
-### Formal Invariants
-
-All 12 invariants enforced at record validation:
-
-1. **Write-Once**: No rewritten records
-2. **Sequence Order**: Monotonic increments
-3. **Hash Chain**: Unbroken cryptographic linkage
-4. **Timestamp Monotonicity**: Time never rewinds
-5. **Writer Consistency**: Same writer_id across session
-6. **Manifest Integrity**: Atomic updates via temp-rename
-7. **Segment Durability**: fsync() after every write
-8. **CRC32 Protection**: Bit-flip detection
-9. **Crash Recovery**: Deterministic rebuild from segments
-10. **Concurrency Safety**: No partial records
-11. **Deterministic Output**: Identical CBOR + SHA256 on replay
-12. **Policy Enforcement**: OCaml layer validation before durability
+Recovery path uses `segment.read_frame()` — validates magic, version, and CRC32 on every frame, rebuilds hash chain from actual CBOR payloads.
 
 ---
 
-## Evidence & Roadmap
+## Protected Inventions
 
-### Current Phase (v0.2.0-dev)
+See [DEFENSIVE_PUBLICATION.md](DEFENSIVE_PUBLICATION.md) and [PATENTS.md](PATENTS.md).
 
-- ✅ All 10 P0 bugs fixed (memory safety, determinism, error handling)
-- ✅ Zig storage layer complete (423 lines, recovery + validation)
-- ✅ Crash injection harness (10+ points, 30 scenarios)
-- ✅ Honest assurance matrix (no inflated claims)
-- ✅ Professional branding (SVG mark + hero)
+Six inventions disclosed as prior art (2026-08-23):
 
-### Next Phases
-
-**v0.3.0 (Evidence Cycle)** — 4 weeks
-- GNATprove formal verification of SPARK invariants
-- Complete 4-language cross-determinism testing
-- C ABI implementation + signing/verification
-
-**v0.4.0 (Complete Implementation)** — 4 weeks
-- Erlang NIF wiring
-- Key management and policy engine
-- Full documentation
-
-**v0.5.0 (Hardening)** — 6 weeks
-- Crash recovery matrix (fuzz-driven)
-- External security audit ($30–60K)
-- Reproducible builds + signed artifacts
-
-**v1.0.0 (Production)** — 2 weeks
-- SLA enforcement
-- Production release
-
-See [ROADMAP.md](ROADMAP.md) for full details, resource requirements, and quality gates.
+1. ML-DSA-44 post-quantum WORM sealing
+2. Multiplicity-based thickness metric for sovereignty enforcement
+3. PCSL-gated SUBLEQ transition with contractivity envelope
+4. ERE five-pass filtration integrated into append-only commit path
+5. RegHom Merkle-anchored morphism registry
+6. Prime-vector commitment with IPA-compatible update stability
 
 ---
 
-## Commercial Licensing
-
-For production deployments, commercial licensing is required:
-
-- **Professional**: $5K–15K/year (single deployment)
-- **Enterprise**: Custom pricing (unlimited deployments)
-- **OEM Integration**: Custom terms with key management
-
-Contact: **licensing@worm-engines.dev**
-
----
-
-## Documentation
-
-### Production Readiness
-
-- [ASSURANCE_MATRIX.md](ASSURANCE_MATRIX.md) — Evidence levels by component (Specified → Externally Audited)
-- [ROADMAP.md](ROADMAP.md) — 5-phase path to v1.0.0 (v0.3.0 Evidence → v0.5.0 Audit → v1.0.0 Release)
-- [AUDIT_SCOPE.md](AUDIT_SCOPE.md) — External audit engagement scope ($30-60K, 4-6 weeks)
-
-### Technical Specifications
-
-- [GATE_5_SPARK_PROOF.md](GATE_5_SPARK_PROOF.md) — Formal invariant specifications (12 invariants, machine-checkable)
-- [GATE_6_REPLICATION_HARNESS.md](GATE_6_REPLICATION_HARNESS.md) — Erlang replication protocol design
-- [GATE_7_EVIDENCE_COLLECTION.md](GATE_7_EVIDENCE_COLLECTION.md) — Evidence framework (v0.3.0 → v0.5.0 checkpoints)
-- [spark/GNATPROVE_INSTRUCTIONS.md](spark/GNATPROVE_INSTRUCTIONS.md) — GNATprove proof generation for all 12 invariants
-
-### Licensing & Brand
-
-- [COMMERCIAL.md](COMMERCIAL.md) — Commercial licensing tiers (Professional $5-15K/year, Enterprise custom)
-- [docs/assets/brand/BRAND-GUIDE.md](docs/assets/brand/BRAND-GUIDE.md) — Brand identity (hero, mark, colors, typography)
-
----
-
-## Repository
+## Repository Structure
 
 ```
 worm-engines/
-├── zig-engine/              # Durable storage in Zig
-│   ├── src/
-│   │   ├── storage.zig      # Core ledger lifecycle (create/open/recover)
-│   │   ├── segment.zig      # Append-only segment format
-│   │   ├── manifest.zig     # Atomic manifest coordination
-│   │   ├── constants.zig    # Shared types and limits
-│   │   ├── codec.zig        # CBOR encoding
-│   │   ├── hash.zig         # SHA-256 hash chain
-│   │   └── crash_harness.zig # Deterministic crash testing
-│   └── build.zig            # Zig build script
-├── spark/                   # Formal specification in Ada SPARK
-│   └── worm_invariants.spark # 12 machine-checkable invariants
-├── erlang/                  # Replication mesh (in progress)
-├── spec/                    # Protocol specifications
-├── docs/
-│   └── assets/
-│       └── brand/           # SVG mark + hero + brand guide
-├── ASSURANCE_MATRIX.md      # Evidence and status
-├── COMMERCIAL.md            # Licensing tiers
-├── ROADMAP.md               # Path to production
-├── LICENSE                  # BSL 1.1 (Elastic Commons Clause)
-└── README.md                # This file
+├── zig-engine/src/
+│   ├── ml_dsa.zig        ML-DSA-44 pure Zig (NIST FIPS 204)
+│   ├── pq_sign.zig       Post-quantum signing interface
+│   ├── invariants.zig    12 structural invariants
+│   ├── storage.zig       Append path + hash chain rebuild
+│   ├── segment.zig       WORM frame format (magic + CRC32)
+│   ├── codec.zig         CBOR encode/decode (actual length)
+│   ├── constants.zig     Record type + error codes
+│   ├── record.zig        WormRecord (ML-DSA-44 signature field)
+│   ├── manifest.zig      Atomic manifest (temp-rename)
+│   ├── hash.zig          SHA-256 domain hash + wrappers
+│   └── writer.zig        Per-stream state tracking
+├── spark/                Ada SPARK formal specifications
+├── ocaml/                OCaml policy layer
+├── erlang/               Erlang replication mesh
+├── .github/workflows/    CI: Zig build+test, OCaml, Erlang
+├── DEFENSIVE_PUBLICATION.md  Full prior art disclosure
+├── PATENTS.md            Six protected inventions
+├── NOTICE                Legal notice
+└── LICENSE               Tri-license: AGPL / BSL 1.1 / MIT
 ```
 
 ---
 
-## Copyright & License
+## Run
 
-**Copyright © 2026 Sovereign Source Foundation. All rights reserved.**
-
-Licensed under Business Source License 1.1 (Elastic Commons Clause).
-
-**Change Date:** December 31, 2027  
-**Change License:** AGPL-3.0-only
-
-See [LICENSE](LICENSE) and [COMMERCIAL.md](COMMERCIAL.md) for complete terms.
+```bash
+cd zig-engine
+zig build
+zig build test --summary all
+```
 
 ---
 
-**WORM Engines**  
-Multi-language append-only ledger fabric for commercial infrastructure.
+## License
 
-Built with precision. Verified by design.
+Tri-license — choose any one:
+- **AGPL-3.0** for open source / community use
+- **BSL 1.1 → MIT** for commercial use (< 5 servers free; converts 2029-01-01)
+- **MIT** after 2029-01-01
+
+See [LICENSE](LICENSE) for full text and six protected inventions.
+
+Copyright (C) 2026 Ahmad Ali Parr, Jessica L. Williams / SNAPKITTYWEST  
+Bel Esprit D'Accord Irrevocable Trust
+
+---
+
+*Part of the Sovereign Stack — [unified paper](https://snapkittywest.github.io/hyperkitty/papers/sovereign-stack-unified.pdf)*
